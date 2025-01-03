@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
-import { fetchApi } from '@/lib/api-config'
+import { api, apiConfig } from '@/lib/api-config'
 
 export default function ResendVerificationPage() {
   const [email, setEmail] = useState('')
@@ -19,9 +19,8 @@ export default function ResendVerificationPage() {
     setIsLoading(true)
 
     try {
-      await fetchApi('/api/v1/auth/resend-verification', {
-        method: 'POST',
-        body: JSON.stringify({ email }),
+      await api.post(apiConfig.endpoints.auth.resend, {
+        email,
       })
       toast({
         title: "Verification Email Sent",

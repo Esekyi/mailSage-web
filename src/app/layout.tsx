@@ -1,6 +1,7 @@
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
+import { Providers } from '@/app/providers'
 import { DynamicFavicon } from '@/components/dynamic-favicon'
 import './globals.css'
 
@@ -34,9 +35,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <DynamicFavicon />
-          {children}
-          <Toaster />
+          <Providers>
+            <DynamicFavicon />
+            {children}
+            <Toaster />
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

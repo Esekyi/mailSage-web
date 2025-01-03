@@ -7,84 +7,32 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
-import { fetchApi, ApiError } from '@/lib/api-config'
+import { useAuth } from '@/hooks/use-auth'
+import { ApiError } from '@/lib/api-config'
 import { Eye, EyeOff } from 'lucide-react'
-
-
-
-interface LoginResponse {
-  status: string;
-  data: {
-    access_token: string;
-    refresh_token: string;
-    token_type: string;
-    user: {
-      id: number;
-      email: string;
-      role: string;
-      name: string;
-      email_verified: boolean;
-    };
-    error?: {
-      code?: string
-    }
-  };
-}
 
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
   const router = useRouter()
   const { toast } = useToast()
+  const { login, isLoginLoading } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
 
     try {
-      const response = await fetchApi<LoginResponse>('/api/v1/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password }),
+      await login({email: email.toLowerCase(), password})
+
+      // Show success toast
+      toast({
+        title: "Success",
+        description: "Successfully logged in!"
       })
 
-      if (response.status === 'success') {
-        if (!response.data.user.email_verified) {
-          toast({
-            title: "Email not verified",
-            description: "Please verify your email before logging in.",
-            variant: "destructive",
-            action: (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/resend-verification')}
-              >
-                Resend Verification
-              </Button>
-            ),
-          })
-          router.push('/resend-verification')
-          return
-        }
-
-        // Store tokens
-        localStorage.setItem('authToken', response.data.access_token)
-        localStorage.setItem('refreshToken', response.data.refresh_token)
-        localStorage.setItem('user', JSON.stringify(response.data.user))
-
-        router.push('/dashboard')
-
-        // Show success toast
-        toast({
-          title: "Success",
-          description: "Successfully logged in!",
-          variant: "default",
-        })
-      }
     } catch (error) {
       const apiError = error as ApiError
 
@@ -98,6 +46,7 @@ export default function Login() {
           action: (
             <Button
               variant="outline"
+              className='text-primary'
               size="sm"
               onClick={() => router.push('/resend-verification')}
             >
@@ -108,7 +57,6 @@ export default function Login() {
         router.push('/resend-verification')
         return
       }
-
       if (apiError.errors) {
         // Validation errors
         const errorMessage = Object.entries(apiError.errors)
@@ -116,7 +64,7 @@ export default function Login() {
           .join('\n')
 
         toast({
-          title: "Validation Error",
+          title: "Error",
           description: errorMessage,
           variant: "destructive",
         })
@@ -129,8 +77,6 @@ export default function Login() {
           variant: "destructive",
         })
       }
-    } finally {
-      setIsLoading(false) 
     }
   }
 
@@ -153,7 +99,7 @@ export default function Login() {
                 placeholder='you@example.com'
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
+                disabled={isLoginLoading}
               />
             </div>
             <div>
@@ -168,7 +114,7 @@ export default function Login() {
                   placeholder='••••••••'
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  disabled={isLoading}
+                  disabled={isLoginLoading}
                 />
                 <button
                     type="button"
@@ -187,8 +133,8 @@ export default function Login() {
           </div>
 
           <div className='px-4'>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Signing in...' : 'Sign in'}
+            <Button type="submit" className="w-full" disabled={isLoginLoading}>
+              {isLoginLoading ? 'Signing in...' : 'Sign in'}
             </Button>
           </div>
         </form>
