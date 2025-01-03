@@ -8,27 +8,28 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { useToast } from '@/hooks/use-toast'
-import { ApiError, fetchApi } from '@/lib/api-config'
+import { ApiError, api, apiConfig } from '@/lib/api-config'
 import { Eye, EyeOff, Check, X } from 'lucide-react'
 
+
+// Types
+interface User {
+  id: number
+  email: string
+  name: string
+  role: string
+}
+
+interface RegisterResponse {
+  user: User
+  message: string
+}
 
 interface PasswordRequirement {
   test: RegExp | ((value: string) => boolean);
   text: string;
 }
 
-interface RegisterResponse {
-  status: string;
-  message: string;
-  data?: {
-    user: {
-      id: number;
-      email: string;
-      name: string;
-      role: string;
-    };
-  };
-}
 
 const passwordRequirements: PasswordRequirement[] = [
   { test: /.{8,}/, text: "At least 8 characters" },
@@ -74,8 +75,8 @@ export default function Register() {
   useEffect(() => {
     // Update password validations
     const newValidations = passwordRequirements.map(req =>
-      req.test instanceof RegExp ? 
-        req.test.test(formData.password) : 
+      req.test instanceof RegExp ?
+        req.test.test(formData.password) :
         req.test(formData.password)
     )
 
@@ -130,15 +131,17 @@ export default function Register() {
       }
 
        // Remove confirmPassword before sending to API
-      const { confirmPassword, ...registerData } = formData
+      const registerPayload = {
+        email: formData.email.toLowerCase(),
+        name: formData.name.charAt(0).toUpperCase() + formData.name.slice(1),
+        password: formData.password
+      }
 
-      const response = await fetchApi<RegisterResponse>('/api/v1/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(registerData),
-      })
+      await api.post<RegisterResponse, {email: string, name: string, password: string}>(
+        apiConfig.endpoints.auth.register,
+        registerPayload
+      )
 
-      if (response.status === 'success') {
       toast({
         title: "Registration Successful",
         description: (
@@ -153,8 +156,9 @@ export default function Register() {
           </div>
         ),
       })
+
       router.push('/login')
-      }
+
     } catch (error) {
       const apiError = error as ApiError
 
@@ -336,9 +340,9 @@ export default function Register() {
           </div>
 
           <div className='px-4'>
-            <Button 
-              type="submit" 
-              className="w-full" 
+            <Button
+              type="submit"
+              className="w-full"
               disabled={isLoading || !validations.password.every(v => v) || !validations.passwordsMatch}
             >
               {isLoading ? "Creating account..." : "Create Account"}
@@ -347,8 +351,8 @@ export default function Register() {
         </form>
         <p className="mt-2 text-center text-sm text-gray-600">
           Already have an account?{' '}
-          <Link 
-            href="/login" 
+          <Link
+            href="/login"
             className="font-medium text-primary hover:underline"
           >
             Sign in here

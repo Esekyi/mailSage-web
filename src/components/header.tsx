@@ -5,6 +5,7 @@ import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { Moon, Sun, Menu } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import { useAuthStore } from '@/store/auth'
 import {
   Sheet,
   SheetContent,
@@ -16,6 +17,83 @@ const Image = dynamic(() => import('next/image'), {ssr: false})
 
 export function Header() {
   const { theme, setTheme } = useTheme()
+  const { isAuthenticated } = useAuthStore()
+
+  const navigationItems = isAuthenticated ? (
+    <>
+      <Link href="/features" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+        Features
+      </Link>
+      <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+        Pricing
+      </Link>
+      <Link href="/docs" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+        Docs
+      </Link>
+      <Link href="/dashboard">
+        <Button variant="ghost" size="sm">Dashboard</Button>
+      </Link>
+      <Link href="/dashboard/settings">
+        <Button size="sm">Account</Button>
+      </Link>
+    </>
+  ) : (
+    <>
+      <Link href="/features" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+        Features
+      </Link>
+      <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+        Pricing
+      </Link>
+      <Link href="/docs" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+        Docs
+      </Link>
+      <Link href="/login">
+        <Button variant="ghost" size="sm">Log in</Button>
+      </Link>
+      <Link href="/register">
+        <Button size="sm">Sign up</Button>
+      </Link>
+    </>
+  )
+
+  const mobileNavigationItems = isAuthenticated ? (
+    <>
+      <Link href="/features" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+        Features
+      </Link>
+      <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+        Pricing
+      </Link>
+      <Link href="/docs" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+        Docs
+      </Link>
+      <Link href="/dashboard">
+        <Button variant="ghost" size="sm" className="w-full justify-start">Dashboard</Button>
+      </Link>
+      <Link href="/dashboard/settings">
+        <Button size="sm" className="w-full">Account</Button>
+      </Link>
+    </>
+  ) : (
+    <>
+      <Link href="/features" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+        Features
+      </Link>
+      <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+        Pricing
+      </Link>
+      <Link href="/docs" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+        Docs
+      </Link>
+      <Link href="/login">
+        <Button variant="ghost" size="sm" className="w-full justify-start">Log in</Button>
+      </Link>
+      <Link href="/register">
+        <Button size="sm" className="w-full">Sign up</Button>
+      </Link>
+    </>
+  )
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -31,21 +109,7 @@ export function Header() {
         </Link>
         <div className='flex-1' />
         <nav className="hidden md:flex items-center space-x-4">
-          <Link href="/features" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-            Features
-          </Link>
-          <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-            Pricing
-          </Link>
-          <Link href="/docs" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-            Docs
-          </Link>
-          <Link href="/login">
-            <Button variant="ghost" size="sm">Log in</Button>
-          </Link>
-          <Link href="/register">
-            <Button size="sm">Sign up</Button>
-          </Link>
+          {navigationItems}
         </nav>
         <Sheet>
           <SheetTrigger asChild className="md:hidden">
@@ -59,21 +123,7 @@ export function Header() {
               Menu
             </SheetTitle>
             <nav className="flex flex-col space-y-4">
-              <Link href="/features" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-                Features
-              </Link>
-              <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-                Pricing
-              </Link>
-              <Link href="/docs" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-                Docs
-              </Link>
-              <Link href="/login">
-                <Button variant="ghost" size="sm" className="w-full justify-start">Log in</Button>
-              </Link>
-              <Link href="/register">
-                <Button size="sm" className="w-full">Sign up</Button>
-              </Link>
+              {mobileNavigationItems}
             </nav>
           </SheetContent>
         </Sheet>

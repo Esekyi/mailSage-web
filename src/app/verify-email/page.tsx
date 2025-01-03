@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { fetchApi } from '@/lib/api-config'
+import { apiConfig, fetchApi } from '@/lib/api-config'
 import { Loader2 } from 'lucide-react'
 
 export default function VerifyEmail() {
@@ -19,7 +19,7 @@ export default function VerifyEmail() {
 
     const verifyEmail = async () => {
       try {
-        await fetchApi('/api/v1/auth/verify-email', {
+        await fetchApi(apiConfig.endpoints.auth.verify, {
           method: 'POST',
           body: JSON.stringify({ token }),
         })
