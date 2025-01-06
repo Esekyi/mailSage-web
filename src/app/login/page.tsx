@@ -18,7 +18,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
 
   const router = useRouter()
-  const { toast } = useToast()
+  const { success, error } = useToast()
   const { login, isLoginLoading } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,33 +28,25 @@ export default function Login() {
       await login({email: email.toLowerCase(), password})
 
       // Show success toast
-      toast({
+      success({
         title: "Success",
         description: "Successfully logged in!"
       })
 
-    } catch (error) {
-      const apiError = error as ApiError
+    } catch (err) {
+      const apiError = err as ApiError
 
       // Handle different types of errors
       if (apiError.message?.includes('Email not verified')) {
         // Validation errors
-        toast({
+        error({
           title: "Email Not Verified",
           description: "Please verify your email before logging in.",
-          variant: "destructive",
-          action: (
-            <Button
-              variant="outline"
-              className='text-primary'
-              size="sm"
-              onClick={() => router.push('/resend-verification')}
-            >
-              Resend Verification
-            </Button>
-          ),
+          action: {
+            label: "Resend",
+            onClick: () => router.push('/resend-verification')
+          }
         })
-        router.push('/resend-verification')
         return
       }
       if (apiError.errors) {
@@ -63,18 +55,15 @@ export default function Login() {
           .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
           .join('\n')
 
-        toast({
+        error({
           title: "Error",
           description: errorMessage,
-          variant: "destructive",
         })
-
       } else {
         // General error (including invalid credentials)
-        toast({
+        error({
           title: "Error",
           description: apiError.message || "Login failed. Please check your credentials.",
-          variant: "destructive",
         })
       }
     }

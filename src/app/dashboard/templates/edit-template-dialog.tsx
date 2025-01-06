@@ -21,6 +21,7 @@ import { VersionHistory } from './version-history'
 import { History, Save } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
+import { ApiError } from '@/lib/api-config'
 
 interface EditTemplateDialogProps {
   template: Template | null
@@ -49,7 +50,7 @@ export function EditTemplateDialog({
 
   const updateTemplate = useUpdateTemplate()
   const createTemplate = useCreateTemplate()
-  const { toast } = useToast()
+  const { success, error, info } = useToast()
 
   // Initialize form when template changes
   useEffect(() => {
@@ -90,9 +91,8 @@ export function EditTemplateDialog({
 
       if (mode === 'create') {
         await createTemplate.mutateAsync(templateData)
-        toast({
-          title: "Success",
-          description: "Template created successfully",
+        success({
+          description: "Template created successfully"
         })
       } else {
         if (!template) return
@@ -100,19 +100,18 @@ export function EditTemplateDialog({
           templateId: template.id,
           data: { ...templateData, change_summary: editedTemplate.change_summary }
         })
-        toast({
-          title: "Success",
-          description: "Template updated successfully",
+        info({
+          description: "Template updated successfully"
         })
       }
 
       onOpenChange(false)
       onSuccess?.()
-    } catch (error: any) {
-      toast({
+    } catch (err) {
+      const apiError = err as ApiError
+      error({
         title: "Error",
-        description: error.response?.data?.error || `Failed to ${mode} template`,
-        variant: "destructive",
+        description: apiError.message || `Failed to ${mode} template`,
       })
     }
   }

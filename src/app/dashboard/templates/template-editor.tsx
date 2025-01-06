@@ -106,6 +106,7 @@ export function TemplateEditor({
             height="500px"
             language={editorMode === 'html' ? 'html' : 'markdown'}
             value={value}
+            loading={<div className="flex items-center justify-center h-[500px]">Loading editor...</div>}
             onChange={handleEditorChange}
             options={{
               minimap: { enabled: false },
@@ -113,6 +114,10 @@ export function TemplateEditor({
               lineNumbers: 'on',
               formatOnPaste: true,
               automaticLayout: true,
+              scrollBeyondLastLine: false,
+              fontSize: 14,
+              tabSize: 2,
+              overviewRulerBorder: false, // This disables the overview ruler
             }}
           />
         </TabsContent>

@@ -97,7 +97,10 @@ export default function SMTPPage() {
         <SMTPForm
           open={showAddForm}
           onOpenChange={setShowAddForm}
-          onSubmit={createSmtp}
+          onSubmit={async (data) => {
+            await createSmtp(data)
+            setShowAddForm(false)
+          }}
           isSubmitting={isCreating}
         />
       </div>
@@ -226,7 +229,10 @@ export default function SMTPPage() {
       <SMTPForm
         open={showAddForm}
         onOpenChange={setShowAddForm}
-        onSubmit={createSmtp}
+        onSubmit={async (data) => {
+          await createSmtp(data)
+          setShowAddForm(false)
+        }}
         isSubmitting={isCreating}
       />
 

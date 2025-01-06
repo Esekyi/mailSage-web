@@ -1,0 +1,422 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+.docs-content {
+  @apply text-foreground leading-relaxed;
+}
+
+/* Headings with anchor links */
+.docs-content h1,
+.docs-content h2,
+.docs-content h3,
+.docs-content h4 {
+  @apply scroll-m-20 tracking-tight font-sans;
+}
+
+.docs-content h1 {
+  @apply text-4xl font-bold mb-6;
+}
+
+.docs-content h2 {
+  @apply text-2xl font-semibold mt-12 mb-6 first:mt-0 border-b border-border pb-2;
+}
+
+.docs-content h3 {
+  @apply text-xl font-semibold mt-8 mb-4;
+}
+
+/* Lists */
+.docs-content ul,
+.docs-content ol {
+  @apply my-6 ml-6;
+}
+
+.docs-content li {
+  @apply mt-2;
+}
+
+.docs-content ul>li {
+  @apply list-disc;
+}
+
+.docs-content ol>li {
+  @apply list-decimal;
+}
+
+/* Code blocks and Syntax highlighting */
+.docs-content pre {
+  @apply my-6 overflow-x-auto rounded-lg border border-border bg-[#0d1117] dark:bg-[#0d1117] p-0;
+}
+
+.docs-content pre>code {
+  @apply block p-4 overflow-x-auto text-sm font-mono text-[#e6edf3];
+}
+
+/* GitHub-style syntax colors - One Dark Pro theme */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  @apply text-[#8b949e];
+}
+
+.token.punctuation {
+  @apply text-[#c9d1d9];
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  @apply text-[#79c0ff];
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  @apply text-[#a5d6ff];
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  @apply text-[#d2a8ff];
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  @apply text-[#ff7b72];
+}
+
+.token.function,
+.token.class-name {
+  @apply text-[#d2a8ff];
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+  @apply text-[#ffa657];
+}
+
+.token.important,
+.token.bold {
+  @apply font-bold;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+.token.entity {
+  cursor: help;
+}
+
+/* Inline code */
+.docs-content :not(pre)>code {
+  @apply bg-muted px-1.5 py-0.5 rounded-md text-sm font-mono border border-border;
+}
+
+/* Tables */
+.docs-content table {
+  @apply w-full my-6 border-collapse text-sm;
+}
+
+.docs-content table th {
+  @apply font-semibold text-left p-3 bg-muted/50 border border-border;
+}
+
+.docs-content table td {
+  @apply p-3 border border-border;
+}
+
+.docs-content table tr {
+  @apply border-b border-border;
+}
+
+.docs-content table tr:nth-child(even) {
+  @apply bg-muted/30;
+}
+
+.docs-content table code {
+  @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono;
+}
+
+/* Add vertical spacing between table rows for better readability */
+.docs-content table tr+tr {
+  @apply border-t border-border;
+}
+
+/* Make sure tables don't overflow on mobile */
+.docs-content .table-container {
+  @apply w-full overflow-x-auto my-6;
+}
+
+/* Symbol styling */
+.docs-content td:has(✓) {
+  @apply text-green-600 font-medium;
+}
+
+.docs-content td:has(✗) {
+  @apply text-muted-foreground opacity-50;
+}
+
+/* Hover effect */
+.docs-content tbody tr:hover {
+  @apply bg-muted/50;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .docs-content table {
+    @apply block w-full;
+  }
+
+  .docs-content thead,
+  .docs-content tbody,
+  .docs-content tr {
+    @apply block w-full;
+  }
+
+  .docs-content td,
+  .docs-content th {
+    @apply block w-full text-left;
+  }
+
+  .docs-content td:not(:first-child) {
+    @apply text-left;
+  }
+}
+
+/* Links */
+.docs-content a {
+  @apply text-primary underline-offset-4 hover:underline;
+}
+
+/* Blockquotes */
+.docs-content blockquote {
+  @apply mt-6 border-l-2 border-border pl-6;
+  font-style: italic;
+}
+
+/* Custom components */
+.callout {
+  @apply my-6 flex items-start rounded-lg border border-border p-4;
+}
+
+.callout.info {
+  @apply bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800;
+}
+
+.callout.warning {
+  @apply bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800;
+}
+
+/* Code blocks */
+.docs-content pre[class*="language-"] {
+  @apply relative my-6 rounded-lg border border-border;
+  margin: 0;
+  background: #272822 !important;
+}
+
+/* Language badge */
+.docs-content pre[class*="language-"]::before {
+  content: attr(data-language);
+  @apply absolute right-4 top-4 rounded-md px-2 py-1 text-xs font-medium;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+}
+
+/* Code block */
+.docs-content pre[class*="language-"]>code {
+  @apply block p-4 overflow-x-auto text-sm font-mono;
+  background: none !important;
+  color: #f8f8f2 !important;
+  text-shadow: none !important;
+}
+
+/* Base token colors */
+.docs-content .token {
+  background: none !important;
+}
+
+.docs-content .token.comment,
+.docs-content .token.prolog,
+.docs-content .token.doctype,
+.docs-content .token.cdata {
+  color: #8292a2 !important;
+}
+
+.docs-content .token.punctuation {
+  color: #f8f8f2 !important;
+}
+
+.docs-content .token.namespace {
+  opacity: .7 !important;
+}
+
+.docs-content .token.property,
+.docs-content .token.tag,
+.docs-content .token.constant,
+.docs-content .token.symbol,
+.docs-content .token.deleted {
+  color: #f92672 !important;
+}
+
+.docs-content .token.boolean,
+.docs-content .token.number {
+  color: #ae81ff !important;
+}
+
+.docs-content .token.selector,
+.docs-content .token.attr-name,
+.docs-content .token.string,
+.docs-content .token.char,
+.docs-content .token.builtin,
+.docs-content .token.inserted {
+  color: #a6e22e !important;
+}
+
+.docs-content .token.operator,
+.docs-content .token.entity,
+.docs-content .token.url,
+.docs-content .language-css .token.string,
+.docs-content .style .token.string,
+.docs-content .token.variable {
+  color: #f8f8f2 !important;
+}
+
+.docs-content .token.atrule,
+.docs-content .token.attr-value,
+.docs-content .token.function,
+.docs-content .token.class-name {
+  color: #e6db74 !important;
+}
+
+.docs-content .token.keyword {
+  color: #66d9ef !important;
+}
+
+.docs-content .token.regex,
+.docs-content .token.important {
+  color: #fd971f !important;
+}
+
+.docs-content .token.important,
+.docs-content .token.bold {
+  font-weight: bold !important;
+}
+
+.docs-content .token.italic {
+  font-style: italic !important;
+}
+
+/* Python-specific tokens */
+.docs-content .language-python .decorator,
+.docs-content .language-python .annotation,
+.docs-content .language-python .decorator * {
+  color: #f92672 !important;
+}
+
+.docs-content .language-python .string-interpolation {
+  color: #a6e22e !important;
+}
+
+.docs-content .language-python .self,
+.docs-content .language-python .super {
+  color: #66d9ef !important;
+}
+
+/* YAML-specific tokens */
+.docs-content .language-yaml .key {
+  color: #f92672 !important;
+}
+
+.docs-content .language-yaml .string {
+  color: #a6e22e !important;
+}
+
+/* Markdown-specific tokens */
+.docs-content .language-markdown .title,
+.docs-content .language-markdown .title * {
+  color: #f92672 !important;
+}
+
+.docs-content .language-markdown .code {
+  color: #a6e22e !important;
+}
+
+.docs-content .language-markdown .url,
+.docs-content .language-markdown .url * {
+  color: #66d9ef !important;
+}
+
+/* Remove the additional text that appears below code blocks */
+.docs-content pre[class*="language-"]+p {
+  display: none;
+}
+
+/* Ensure code blocks are visible in both light and dark modes */
+:is(.light, .dark) .docs-content pre[class*="language-"] {
+  background: #272822 !important;
+  color: #f8f8f2 !important;
+}
+
+/* Tables */
+.docs-content table {
+  @apply w-full my-6 border-collapse text-sm;
+}
+
+.docs-content table th {
+  @apply font-semibold text-left p-3 bg-muted/50 border border-border;
+}
+
+.docs-content table td {
+  @apply p-3 border border-border;
+}
+
+.docs-content table tr {
+  @apply border-b border-border;
+}
+
+.docs-content table tr:nth-child(even) {
+  @apply bg-muted/30;
+}
+
+/* Symbol styling */
+.docs-content td:has(✓) {
+  @apply text-green-600 font-medium text-center;
+}
+
+.docs-content td:has(✗) {
+  @apply text-muted-foreground opacity-50 text-center;
+}
+
+/* First column styling */
+.docs-content td:first-child {
+  @apply font-medium;
+}
+
+/* Hover effect */
+.docs-content tbody tr:hover {
+  @apply bg-muted/50;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .docs-content table {
+    @apply block w-full overflow-x-auto;
+  }
+}
