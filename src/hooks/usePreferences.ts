@@ -10,7 +10,7 @@ interface ApiErrorResponse {
 
 export function usePreferences() {
   const queryClient = useQueryClient()
-  const { toast } = useToast()
+  const { success, error } = useToast()
 
   const { data: preferences, isLoading } = useQuery<PreferencesData>({
     queryKey: ['preferences'],
@@ -27,16 +27,13 @@ export function usePreferences() {
     },
     onSuccess: (response) => {
       queryClient.setQueryData(['preferences'], response.preferences)
-      toast({
-        title: "Success",
-        description: "Preferences updated successfully",
+      success({
+        description: "Preferences updated successfully"
       })
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || "Failed to update preferences",
-        variant: "destructive",
+    onError: (err) => {
+      error({
+        description: err.response?.data?.error || "Failed to update preferences",
       })
     }
   })

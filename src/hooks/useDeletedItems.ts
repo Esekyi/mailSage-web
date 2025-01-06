@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast'
 
 export function useDeletedItems() {
   const queryClient = useQueryClient()
-  const { toast } = useToast()
+  const { success, error, info } = useToast()
 
   const { data, isLoading } = useQuery<DeletedItemsResponse>({
     queryKey: ['deleted-items'],
@@ -22,13 +22,15 @@ export function useDeletedItems() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['deleted-items'] })
-      toast({ title: "Success", description: data.message })
+      info({
+        title: "Restored!",
+        description: data.message
+      })
     },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || "Failed to restore template",
-        variant: "destructive"
+    onError: (err: any) => {
+      error({
+        title: "Oops!",
+        description: err.response?.data?.error || "Failed to restore template",
       })
     }
   })
@@ -40,13 +42,15 @@ export function useDeletedItems() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['deleted-items'] })
-      toast({ title: "Success", description: data.message })
+      info({
+        title: "Restored!",
+        description: data.message
+      })
     },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || "Failed to restore SMTP",
-        variant: "destructive"
+    onError: (err: any) => {
+      error({
+        title: "Oops!",
+        description: err.response?.data?.error || "Failed to restore SMTP",
       })
     }
   })
@@ -60,13 +64,15 @@ export function useDeletedItems() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['deleted-items'] })
-      toast({ title: "Success", description: data.message })
+      success({
+        title: "Success!",
+        description: data.message
+      })
     },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || "Failed to delete template",
-        variant: "destructive"
+    onError: (err: any) => {
+      error({
+        title: "Error!",
+        description: err.response?.data?.error || "Failed to delete template",
       })
     }
   })
@@ -80,13 +86,15 @@ export function useDeletedItems() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['deleted-items'] })
-      toast({ title: "Success", description: data.message })
+      success({
+        title: "Success!",
+        description: data.message
+      })
     },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || "Failed to delete SMTP",
-        variant: "destructive"
+    onError: (err: any) => {
+      error({
+        title: "Error!",
+        description: err.response?.data?.error || "Failed to delete SMTP",
       })
     }
   })
@@ -100,13 +108,15 @@ export function useDeletedItems() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['deleted-items'] })
-      toast({ title: "Success", description: data.message })
+      success({
+        title: "Success!",
+        description: data.message
+      })
     },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || "Failed to delete all templates",
-        variant: "destructive"
+    onError: (err: any) => {
+      error({
+        title: "Error!",
+        description: err.response?.data?.error || "Failed to delete all templates",
       })
     }
   })
@@ -120,13 +130,15 @@ export function useDeletedItems() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['deleted-items'] })
-      toast({ title: "Success", description: data.message })
+      success({
+        title: "Success",
+        description: data.message
+      })
     },
     onError: (error: any) => {
-      toast({
+      error({
         title: "Error",
         description: error.response?.data?.error || "Failed to delete all SMTP configs",
-        variant: "destructive"
       })
     }
   })

@@ -16,7 +16,7 @@ interface TestEmailParams {
 
 export function useSmtp() {
   const queryClient = useQueryClient()
-  const { toast } = useToast()
+  const { success, error, info, warning } = useToast()
 
   const { data: smtpConfigs, isLoading } = useQuery<SMTPListResponse>({
     queryKey: ['smtp-configs'],
@@ -33,16 +33,13 @@ export function useSmtp() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['smtp-configs'] })
-      toast({
-        title: "Success",
+      success({
         description: "SMTP configuration created successfully",
       })
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || "Failed to create SMTP configuration",
-        variant: "destructive",
+    onError: (err) => {
+      error({
+        description: err.response?.data?.error || "Failed to create SMTP configuration",
       })
     }
   })
@@ -54,16 +51,15 @@ export function useSmtp() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['smtp-configs'] })
-      toast({
-        title: "Success",
+      info({
+        title: "Updated",
         description: "SMTP configuration updated successfully",
       })
     },
-    onError: (error) => {
-      toast({
+    onError: (err) => {
+      error({
         title: "Error",
-        description: error.response?.data?.error || "Failed to update SMTP configuration",
-        variant: "destructive",
+        description: err.response?.data?.error || "Failed to update SMTP configuration",
       })
     }
   })
@@ -75,16 +71,14 @@ export function useSmtp() {
     },
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['smtp-configs'] })
-      toast({
-        title: "Success",
+      warning({
         description: response.message,
       })
     },
-    onError: (error) => {
-      toast({
+    onError: (err) => {
+      error({
         title: "Error",
-        description: error.response?.data?.error || "Failed to delete SMTP configuration",
-        variant: "destructive",
+        description: err.response?.data?.error || "Failed to delete SMTP configuration",
       })
     }
   })
@@ -98,16 +92,15 @@ export function useSmtp() {
     },
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['smtp-configs'] })
-      toast({
-        title: "Success",
+      info({
+        title: "Test Sent",
         description: response.message,
       })
     },
-    onError: (error) => {
-      toast({
+    onError: (err) => {
+      error({
         title: "Error",
-        description: error.response?.data?.error || "Failed to test SMTP configuration",
-        variant: "destructive",
+        description: err.response?.data?.error || "Failed to test SMTP configuration",
       })
     }
   })
@@ -119,16 +112,15 @@ export function useSmtp() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['smtp-configs'] })
-      toast({
-        title: "Success",
+      info({
+        title: "Updated",
         description: "Default SMTP configuration updated",
       })
     },
-    onError: (error) => {
-      toast({
+    onError: (err) => {
+      error({
         title: "Error",
-        description: error.response?.data?.error || "Failed to set default SMTP configuration",
-        variant: "destructive",
+        description: err.response?.data?.error || "Failed to set default SMTP configuration",
       })
     }
   })

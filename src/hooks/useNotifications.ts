@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast'
 
 export function useNotifications(page = 1, per_page = 12) {
   const queryClient = useQueryClient()
-  const { toast } = useToast()
+  const { success, error } = useToast()
 
   const notificationsQuery = useQuery<NotificationsResponse>({
     queryKey: ['notifications', page, per_page],
@@ -38,16 +38,15 @@ export function useNotifications(page = 1, per_page = 12) {
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
       queryClient.invalidateQueries({ queryKey: ['notifications-unread'] })
 
-      toast({
+      success({
         title: "Success",
         description: "Notifications marked as read",
       })
     },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || "Failed to mark notifications as read",
-        variant: "destructive",
+    onError: (err: any) => {
+      error({
+        title: "Oops!",
+        description: err.response?.data?.error || "Failed to mark notifications as read",
       })
     }
   })

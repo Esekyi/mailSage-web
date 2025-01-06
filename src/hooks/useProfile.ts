@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/auth'
 import axiosInstance from '@/lib/axios'
 
 export function useProfile() {
-  const { toast } = useToast()
+  const { success } = useToast()
   const queryClient = useQueryClient()
   const { updateUser } = useAuthStore()
 
@@ -38,7 +38,7 @@ export function useProfile() {
       // Refetch the profile data
       await queryClient.invalidateQueries({ queryKey: ['profile'] })
 
-      toast({
+      success({
         title: "Success",
         description: "Your profile has been updated.",
       })
