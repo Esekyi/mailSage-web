@@ -54,6 +54,7 @@ mailSage Dashboard provides a centralized interface for:
 
 ## Project Structure
 
+```
 src/
 ├── app/ # Next.js app router pages
 ├── components/ # Reusable React components
@@ -64,6 +65,7 @@ src/
 ├── lib/ # Utility functions and services
 ├── styles/ # Global styles and Tailwind config
 └── types/ # TypeScript type definitions
+```
 
 ## Documentation - to be hosted on docs.mailsage.io
 
