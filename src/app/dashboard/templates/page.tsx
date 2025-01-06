@@ -10,9 +10,10 @@ import { EditTemplateDialog } from './edit-template-dialog'
 import { columns } from './columns'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { toast } from '@/hooks/use-toast'
+import { useToast } from '@/hooks/use-toast'
 import { DeleteTemplateDialog } from '@/components/templates/delete-template-dialog'
 import { Skeleton } from "@/components/ui/skeleton"
+import { ApiError } from '@/lib/api-config'
 
 function LoadingState() {
   return (
@@ -49,6 +50,7 @@ export default function TemplatesPage() {
 
   const { data, isLoading } = useTemplates(params)
   const deleteTemplate = useDeleteTemplate()
+  const { success, error } = useToast()
 
   const handleEdit = (template: Template) => {
     setSelectedTemplate(template)
@@ -75,16 +77,16 @@ export default function TemplatesPage() {
   const handleConfirmDelete = async (template: Template) => {
     try {
       await deleteTemplate.mutateAsync(template.id)
-      toast({
+      success({
         title: "Success",
-        description: "Template deleted successfully",
+        description: "Template deleted successfully"
       })
       setTemplateToDelete(null)
-    } catch (error: any) {
-      toast({
+    } catch (err) {
+      const apiError = err as ApiError
+      error({
         title: "Error",
-        description: error.response?.data?.error || "Failed to delete template",
-        variant: "destructive",
+        description: apiError.message || "Failed to delete template",
       })
     }
   }

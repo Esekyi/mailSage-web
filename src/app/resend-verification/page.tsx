@@ -12,7 +12,7 @@ export default function ResendVerificationPage() {
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const { toast } = useToast()
+  const { success, error } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -22,16 +22,15 @@ export default function ResendVerificationPage() {
       await api.post(apiConfig.endpoints.auth.resend, {
         email,
       })
-      toast({
+      success({
         title: "Verification Email Sent",
         description: "Please check your inbox for the verification link.",
       })
       router.push('/login')
-    } catch (error) {
-      toast({
+    } catch (err) {
+      error({
         title: "Error",
         description: "Failed to resend verification email. Please try again.",
-        variant: "destructive",
       })
     } finally {
       setIsLoading(false)

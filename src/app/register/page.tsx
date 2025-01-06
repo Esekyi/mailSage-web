@@ -58,7 +58,7 @@ export default function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const router = useRouter()
-  const { toast } = useToast()
+  const { error, success, info } = useToast()
 
   const calculatePasswordStrength = (password: string): number => {
     if (!password) return 0
@@ -142,25 +142,21 @@ export default function Register() {
         registerPayload
       )
 
-      toast({
+      success({
         title: "Registration Successful",
-        description: (
-          <div className="space-y-2">
-            <p>Please check your email to verify your account.</p>
-            <p className="text-sm text-muted-foreground">
-              Didn&apos;t receive the email?{' '}
-              <Link href="/resend-verification" className="font-medium underline">
-                Click here to resend
-              </Link>
-            </p>
-          </div>
-        ),
+        description: `Please check your email to verify your account.
+              Didn't receive the email?
+        `,
+        action: {
+          label: "Click to resend",
+          onClick: () => router.push('/resend-verification')
+        }
       })
 
       router.push('/login')
 
-    } catch (error) {
-      const apiError = error as ApiError
+    } catch (err) {
+      const apiError = err as ApiError
 
       if (apiError.errors) {
         // Handle validation errors
@@ -168,16 +164,14 @@ export default function Register() {
           .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
           .join('\n')
 
-        toast({
+        info({
           title: "Registration Failed",
           description: errorMessages,
-          variant: "destructive",
         })
       } else {
-        toast({
+        error({
           title: "Registration Failed",
           description: apiError.message || "Failed to create account. Please try again.",
-          variant: "destructive",
         })
       }
     } finally {
