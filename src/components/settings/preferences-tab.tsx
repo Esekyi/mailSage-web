@@ -1,26 +1,44 @@
-import { usePreferences } from "@/hooks/usePreferences"
-import { NotificationPreferences } from "@/components/preferences/notification-preferences"
-import { GeneralPreferences } from "@/components/preferences/general-preferences"
-import { ThemeSelector } from "@/components/preferences/theme-selector"
-import { TimezoneSelector } from "@/components/preferences/timezone-selector"
-import { Separator } from "@/components/ui/separator"
-import { Loader2 } from "lucide-react"
-import type { NotificationSettings } from "@/types/preferences"
+import { usePreferences } from '@/hooks/usePreferences'
+import { useThemePreference } from '@/hooks/useThemePreference'
+import { NotificationPreferences } from '@/components/preferences/notification-preferences'
+import { GeneralPreferences } from '@/components/preferences/general-preferences'
+import { ThemeSelector } from '@/components/preferences/theme-selector'
+import { TimezoneSelector } from '@/components/preferences/timezone-selector'
+import { NotificationSettings } from '@/types/preferences'
+import { Loader2 } from 'lucide-react'
+import { Separator } from '@/components/ui/separator'
+import { useEffect } from 'react'
 
 export function PreferencesTab() {
   const {
     preferences,
-    isLoading,
+    isLoading: isPreferencesLoading,
     updatePreferences,
     isUpdating
   } = usePreferences()
 
-  if (isLoading) {
+  const {
+    theme,
+    setTheme,
+  } = useThemePreference()
+
+  useEffect(() => {
+    if (!isPreferencesLoading && preferences?.theme && theme !== preferences.theme) {
+      setTheme(preferences.theme)
+    }
+  }, [isPreferencesLoading, preferences?.theme, setTheme, theme])
+
+  if (isPreferencesLoading) {
     return (
       <div className="flex items-center justify-center h-96">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     )
+  }
+
+  const handleThemeChange = (newTheme: 'light' | 'dark') => {
+    // This will update both the UI and save to database
+    setTheme(newTheme)
   }
 
   const handleEmailNotificationsChange = (key: keyof NotificationSettings, value: boolean) => {
@@ -47,10 +65,6 @@ export function PreferencesTab() {
     })
   }
 
-  const handleThemeChange = (theme: 'light' | 'dark') => {
-    updatePreferences({ theme })
-  }
-
   const handleTimezoneChange = (timezone: string) => {
     updatePreferences({ timezone })
   }
@@ -67,6 +81,21 @@ export function PreferencesTab() {
       <Separator />
 
       <div className="grid gap-6">
+        <div className="grid gap-4 md:grid-cols-2">
+          <ThemeSelector
+            theme={theme === 'system' ? (window?.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme as 'light' | 'dark'}
+            onChange={handleThemeChange}
+            disabled={isUpdating || isPreferencesLoading}
+            description="Choose your default theme preference. This will be saved to your account."
+          />
+
+          <TimezoneSelector
+            timezone={preferences.timezone}
+            onChange={handleTimezoneChange}
+            disabled={isUpdating}
+          />
+        </div>
+
         <div className="grid gap-4 md:grid-cols-2">
           <NotificationPreferences
             title="Email Notifications"
@@ -90,20 +119,6 @@ export function PreferencesTab() {
           onChange={handlePreferencesChange}
           disabled={isUpdating}
         />
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <ThemeSelector
-            theme={preferences.theme}
-            onChange={handleThemeChange}
-            disabled={isUpdating}
-          />
-
-          <TimezoneSelector
-            timezone={preferences.timezone}
-            onChange={handleTimezoneChange}
-            disabled={isUpdating}
-          />
-        </div>
       </div>
     </div>
   )

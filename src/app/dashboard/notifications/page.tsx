@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useNotifications } from '@/hooks/useNotifications'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Loader2, Check, Bell } from 'lucide-react'
+import { Loader2, CheckCircle2, XCircle, AlertTriangle, Info, AlertOctagon, Bell, Shield, AlertCircle } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -26,9 +26,21 @@ export default function NotificationsPage() {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'success':
-        return <Check className="h-4 w-4 text-green-500" />
+        return <CheckCircle2 className="h-4 w-4 text-green-500" />
       case 'error':
-        return <Bell className="h-4 w-4 text-red-500" />
+        return <XCircle className="h-4 w-4 text-red-500" />
+      case 'warning':
+        return <AlertTriangle className="h-4 w-4 text-yellow-500" />
+      case 'info':
+        return <Info className="h-4 w-4 text-blue-500" />
+      case 'critical':
+        return <AlertOctagon className="h-4 w-4 text-red-600" />
+      case 'alert':
+        return <Bell className="h-4 w-4 text-orange-500" />
+      case 'attention':
+        return <AlertCircle className="h-4 w-4 text-purple-500" />
+      case 'security':
+        return <Shield className="h-4 w-4 text-indigo-500" />
       default:
         return <Bell className="h-4 w-4 text-blue-500" />
     }
