@@ -3,15 +3,16 @@
 import Link from 'next/link'
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
-import { Moon, Sun, Bell } from 'lucide-react'
+import { Bell } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useNotifications } from '@/hooks/useNotifications'
 import { Badge } from '@/components/ui/badge'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 const Image = dynamic(() => import('next/image'), {ssr: false})
 
 export function DashboardHeader() {
-  const { theme, setTheme } = useTheme()
+  const { theme } = useTheme()
   const { unreadCount } = useNotifications()
 
   return (
@@ -44,19 +45,9 @@ export function DashboardHeader() {
               )}
             </Button>
           </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="bg-muted"
-          >
-            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
-          </Button>
+          <ThemeToggle className="bg-muted" permanent={true} />
         </nav>
       </div>
     </header>
   )
 }
-

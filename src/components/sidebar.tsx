@@ -15,8 +15,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useTheme } from 'next-themes'
 import { useAuthStore } from '@/store/auth'
+import { useThemePreference } from "@/hooks/useThemePreference"
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -31,7 +31,7 @@ export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
-  const { setTheme, theme } = useTheme()
+  const { theme, setTheme } = useThemePreference()
   const { user, logout } = useAuthStore()
 
   const handleLogout = () => {
@@ -40,7 +40,8 @@ export function Sidebar() {
   }
 
   const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light')
+    const newTheme = theme === 'light' ? 'dark' : 'light'
+    setTheme(newTheme)
   }
 
   return (

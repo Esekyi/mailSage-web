@@ -12,10 +12,15 @@ import {
   SheetTrigger,
   SheetTitle
 } from '@/components/ui/sheet'
+import { cn } from "@/lib/utils"
 
 const Image = dynamic(() => import('next/image'), {ssr: false})
 
-export function Header() {
+interface HeaderProps {
+  className?: string
+}
+
+export function Header({ className }: HeaderProps) {
   const { theme, setTheme } = useTheme()
   const { isAuthenticated } = useAuthStore()
 
@@ -96,7 +101,7 @@ export function Header() {
   )
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className={cn("bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60", className)}>
       <div className="container flex h-14 items-center">
         <Link href="/" className="flex items-center space-x-2">
           <Image
