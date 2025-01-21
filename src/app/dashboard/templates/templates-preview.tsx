@@ -5,16 +5,25 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Eye, EyeOff, RefreshCw } from 'lucide-react'
+import { Eye, EyeOff, RefreshCw, History } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { axiosInstance } from '@/lib/axios'
+import { Badge } from '@/components/ui/badge'
+import { Template } from '@/types/templates'
 
 interface PreviewProps {
   html: string
   variables: string[]
+  template?: Template
+  onVersionHistoryClick?: () => void
 }
 
-export function TemplatePreview({ html, variables }: PreviewProps) {
+export function TemplatePreview({
+  html,
+  variables,
+  template,
+  onVersionHistoryClick
+}: PreviewProps) {
   const [showPreview, setShowPreview] = useState(true)
   const [testData, setTestData] = useState<Record<string, string>>({})
 
@@ -49,7 +58,26 @@ export function TemplatePreview({ html, variables }: PreviewProps) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Template Preview</h3>
+        <div className="flex items-center gap-4">
+          <h3 className="text-lg font-medium">Template Preview</h3>
+          {template && (
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">
+                Version {template.version_info.current_version}
+              </Badge>
+              {template.version_info.has_versions && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onVersionHistoryClick}
+                >
+                  <History className="h-4 w-4 mr-2" />
+                  View History
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
         <div className="flex gap-2">
           <Button
             variant="outline"

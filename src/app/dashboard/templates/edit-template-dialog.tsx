@@ -1,9 +1,7 @@
-// src/components/templates/edit-template-dialog.tsx
-
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Template } from '@/types/template'
+import { Template, TemplateApiError } from '@/types/templates'
 import {
   Dialog,
   DialogContent,
@@ -13,15 +11,16 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { useUpdateTemplate, useCreateTemplate } from '@/hooks/useTemplates'
+import { useTemplates } from '@/hooks/useTemplates'
 import { useToast } from '@/hooks/use-toast'
 import { TemplateEditor } from './template-editor'
 import { TemplatePreview } from './templates-preview'
 import { VersionHistory } from './version-history'
-import { History, Save } from 'lucide-react'
+import { History, Save, Tag } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { ApiError } from '@/lib/api-config'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { AxiosError } from 'axios'
 
 interface EditTemplateDialogProps {
   template: Template | null
@@ -42,15 +41,16 @@ export function EditTemplateDialog({
     name: '',
     description: '',
     html_content: '',
-    change_summary: ''
+    change_summary: '',
+    tags: [] as string[]
   })
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const [requiredVariables, setRequiredVariables] = useState<string[]>([])
+  const [newTag, setNewTag] = useState('')
 
-  const updateTemplate = useUpdateTemplate()
-  const createTemplate = useCreateTemplate()
-  const { success, error, info } = useToast()
+  const { createTemplate, updateTemplate } = useTemplates()
+  const toast = useToast()
 
   // Initialize form when template changes
   useEffect(() => {
@@ -59,7 +59,8 @@ export function EditTemplateDialog({
         name: '',
         description: '',
         html_content: '',
-        change_summary: ''
+        change_summary: '',
+        tags: []
       })
       setRequiredVariables([])
     } else if (template) {
@@ -67,7 +68,8 @@ export function EditTemplateDialog({
         name: template.name,
         description: template.description || '',
         html_content: template.html_content,
-        change_summary: ''
+        change_summary: '',
+        tags: template.tags || []
       })
       setRequiredVariables(template.required_variables)
     }
@@ -81,37 +83,61 @@ export function EditTemplateDialog({
   }, [editedTemplate.html_content])
 
   const handleSave = async () => {
-
     try {
       const templateData = {
         name: editedTemplate.name,
         description: editedTemplate.description,
         html_content: editedTemplate.html_content,
+        tags: editedTemplate.tags,
+        ...(mode === 'edit' && {
+          change_summary: editedTemplate.change_summary || undefined
+        })
       }
 
       if (mode === 'create') {
         await createTemplate.mutateAsync(templateData)
-        success({
+        toast.success({
           description: "Template created successfully"
         })
       } else {
         if (!template) return
         await updateTemplate.mutateAsync({
-          templateId: template.id,
-          data: { ...templateData, change_summary: editedTemplate.change_summary }
+          id: template.id,
+          payload: templateData
         })
-        info({
-          description: "Template updated successfully"
+        toast.success({
+          description: `Template updated successfully (Version ${template.version_info.current_version + 1})`
         })
       }
 
       onOpenChange(false)
       onSuccess?.()
-    } catch (err) {
-      const apiError = err as ApiError
-      error({
+    } catch (error) {
+      const apiError = error as AxiosError<TemplateApiError>
+
+      // Handle limit errors (403)
+      if (apiError.response?.status === 403 && 'current_usage' in apiError.response.data) {
+        const limitError = apiError.response.data
+        toast.error({
+          title: "Plan Limit Reached",
+          description: limitError.error || "Failed to save template"
+        })
+        return
+      }
+
+      // Handle validation errors (400)
+      if (apiError.response?.status === 400) {
+        toast.error({
+          title: "Validation Error",
+          description: apiError.response.data.error
+        })
+        return
+      }
+
+      // Handle other errors
+      toast.error({
         title: "Error",
-        description: apiError.message || `Failed to ${mode} template`,
+        description: apiError.response?.data?.error || "Failed to save template"
       })
     }
   }
@@ -122,6 +148,24 @@ export function EditTemplateDialog({
       html_content: version.html_content,
       change_summary: `Restored from version ${version.version}`
     }))
+    setIsHistoryOpen(false)
+  }
+
+  const addTag = () => {
+    if (newTag && !editedTemplate.tags.includes(newTag)) {
+      setEditedTemplate(prev => ({
+        ...prev,
+        tags: [...prev.tags, newTag]
+      }))
+      setNewTag('')
+    }
+  }
+
+  const removeTag = (tagToRemove: string) => {
+    setEditedTemplate(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }))
   }
 
   if (!template && mode === 'edit') return null
@@ -129,12 +173,21 @@ export function EditTemplateDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-4xl h-[90vh] flex flex-col overflow-hidden">
           <DialogHeader className="flex-shrink-0">
             <div className="flex justify-between items-center">
-              <DialogTitle>{mode === 'create' ? 'Create Template' : 'Edit Template'}</DialogTitle>
+              <div className="flex items-center gap-4">
+                <DialogTitle>
+                  {mode === 'create' ? 'Create Template' : 'Edit Template'}
+                </DialogTitle>
+                {mode === 'edit' && template && (
+                  <Badge variant="secondary">
+                    Version {template.version_info.current_version}
+                  </Badge>
+                )}
+              </div>
               <div className="flex items-center gap-2">
-                {mode === 'edit' && (
+                {mode === 'edit' && template?.version_info.has_versions && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -144,7 +197,7 @@ export function EditTemplateDialog({
                     Version History
                   </Button>
                 )}
-                <Button onClick={handleSave} disabled={updateTemplate.isPending}>
+                <Button onClick={handleSave} disabled={createTemplate.isPending || updateTemplate.isPending}>
                   <Save className="h-4 w-4 mr-2" />
                   {mode === 'create' ? 'Create' : 'Save Changes'}
                 </Button>
@@ -152,82 +205,118 @@ export function EditTemplateDialog({
             </div>
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto px-6">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">Template Name</Label>
-                <Input
-                  id="name"
-                  value={editedTemplate.name}
-                  onChange={(e) => setEditedTemplate(prev => ({
-                    ...prev,
-                    name: e.target.value
-                  }))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Input
-                  id="description"
-                  value={editedTemplate.description}
-                  onChange={(e) => setEditedTemplate(prev => ({
-                    ...prev,
-                    description: e.target.value
-                  }))}
-                />
-              </div>
-            </div>
-
-            {requiredVariables.length > 0 && (
-              <div className="space-y-2 mt-2">
-                <Label>Template Variables</Label>
-                <div className="flex flex-wrap gap-2 pb-2">
-                  {requiredVariables.map(variable => (
-                    <Badge key={variable} variant="secondary">
-                      {variable}
-                    </Badge>
-                  ))}
+          <ScrollArea className="flex-1 overflow-y-auto">
+            <div className="space-y-6 p-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Template Name</Label>
+                  <Input
+                    id="name"
+                    value={editedTemplate.name}
+                    onChange={(e) => setEditedTemplate(prev => ({
+                      ...prev,
+                      name: e.target.value
+                    }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Input
+                    id="description"
+                    value={editedTemplate.description}
+                    onChange={(e) => setEditedTemplate(prev => ({
+                      ...prev,
+                      description: e.target.value
+                    }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Tags</Label>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {editedTemplate.tags.map(tag => (
+                      <Badge
+                        key={tag}
+                        variant="secondary"
+                        className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
+                        onClick={() => removeTag(tag)}
+                      >
+                        {tag} ×
+                      </Badge>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Add a tag"
+                      value={newTag}
+                      onChange={(e) => setNewTag(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && addTag()}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={addTag}
+                    >
+                      <Tag className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
-            )}
 
-            <Tabs defaultValue="editor" className="flex-1">
-              <TabsList className="grid w-full grid-cols-2 mt-4">
-                <TabsTrigger value="editor">Editor</TabsTrigger>
-                <TabsTrigger value="preview">Preview</TabsTrigger>
-              </TabsList>
-              <TabsContent value="editor" className="flex-1 mt-0">
-                <TemplateEditor
-                  value={editedTemplate.html_content}
-                  onChange={(value) => setEditedTemplate(prev => ({
-                    ...prev,
-                    html_content: value
-                  }))}
-                  onSave={handleSave}
-                  autoSave={false}
-                />
-              </TabsContent>
-              <TabsContent value="preview" className="flex-1 mt-0">
-                <TemplatePreview
-                  html={editedTemplate.html_content}
-                  variables={requiredVariables}
-                />
-              </TabsContent>
-            </Tabs>
+              {requiredVariables.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Template Variables</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {requiredVariables.map(variable => (
+                      <Badge key={variable} variant="outline">
+                        {variable}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-            <div className="space-y-2 py-4">
-              <Label htmlFor="change-summary">Change Summary</Label>
-              <Input
-                id="change-summary"
-                placeholder="Briefly describe your changes"
-                value={editedTemplate.change_summary}
-                onChange={(e) => setEditedTemplate(prev => ({
-                  ...prev,
-                  change_summary: e.target.value
-                }))}
-              />
+              <Tabs defaultValue="editor" className="flex-1">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="editor">Editor</TabsTrigger>
+                  <TabsTrigger value="preview">Preview</TabsTrigger>
+                </TabsList>
+                <TabsContent value="editor" className="mt-0">
+                  <div className="border rounded-md">
+                    <TemplateEditor
+                      value={editedTemplate.html_content}
+                      onChange={(value) => setEditedTemplate(prev => ({
+                        ...prev,
+                        html_content: value
+                      }))}
+                      onSave={handleSave}
+                      autoSave={false}
+                    />
+                  </div>
+                </TabsContent>
+                <TabsContent value="preview" className="mt-0">
+                  <TemplatePreview
+                    html={editedTemplate.html_content}
+                    variables={requiredVariables}
+                  />
+                </TabsContent>
+              </Tabs>
+
+              {mode === 'edit' && (
+                <div className="space-y-2">
+                  <Label htmlFor="change-summary">Change Summary</Label>
+                  <Input
+                    id="change-summary"
+                    placeholder="Briefly describe your changes"
+                    value={editedTemplate.change_summary}
+                    onChange={(e) => setEditedTemplate(prev => ({
+                      ...prev,
+                      change_summary: e.target.value
+                    }))}
+                  />
+                </div>
+              )}
             </div>
-          </div>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
 
