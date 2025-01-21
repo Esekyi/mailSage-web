@@ -3,12 +3,14 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { Providers } from '@/app/providers'
 import { DynamicFavicon } from '@/components/dynamic-favicon'
 import './globals.css'
-import '@/styles/docs.css'
+import '@/styles/docs/github-markdown.css'
+import '@/styles/docs/prism-github.css'
+
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'mailSage',
+  title: 'MailSage',
   description: 'Email management platform for developers and businesses',
   icons: [
     { rel: 'icon', url: '/favicon-light.svg', type: 'image/svg+xml' },
