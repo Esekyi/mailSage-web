@@ -2,25 +2,31 @@
 
 import { useTheme } from 'next-themes'
 import dynamic from 'next/dynamic'
-import { cn } from '@/lib/utils'
 
-const Image = dynamic(() => import('next/image'), { ssr: false })
+const Image = dynamic(() => import('next/image'), {
+  ssr: false,
+  loading: () => <div className="w-8 h-8" />
+})
 
-export function LoadingLogo({ className }: { className?: string }) {
+interface LoadingLogoProps {
+  className?: string
+}
+
+export function LoadingLogo({ className }: LoadingLogoProps) {
   const { theme } = useTheme()
 
   return (
-    <div className={cn("flex items-center space-x-2", className)}>
-      <div className="relative animate-pulse">
+    <div className="relative w-8 h-8">
+      {theme !== undefined && (
         <Image
           src={theme === 'dark' ? '/navbarLogo-light.svg' : '/navbarLogo-dark.svg'}
-          alt="mailSage Logo"
+          alt="MailSage Logo"
           width={32}
           height={32}
+          className={className}
           priority
         />
-      </div>
-      <span className="font-semibold gradient-text animate-pulse">mailSage</span>
+      )}
     </div>
   )
 }

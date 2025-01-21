@@ -1,90 +1,163 @@
 "use client"
 
 import { useState } from "react"
-import { Check, Copy } from "lucide-react"
+import { formatDistanceToNow } from "date-fns"
+import { AlertTriangle, MoreVertical } from "lucide-react"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { CreateAPIKeyResponse } from "@/types/api-keys"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { useToast } from "@/hooks/use-toast"
+import { type APIKey } from "@/types/api-keys"
+import { formatNumber } from "@/lib/utils"
+import { useApiKeys } from "@/hooks/useApiKeys"
 
-interface ApiKeyDisplayDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  apiKeyData: CreateAPIKeyResponse | null
+interface ApiKeyDisplayProps {
+  apiKey: APIKey
+  onRevoke: (id: number) => Promise<void>
+  dailyUsage?: number
+  dailyLimit?: number
 }
 
-export function ApiKeyDisplayDialog({
-  open,
-  onOpenChange,
-  apiKeyData,
-}: ApiKeyDisplayDialogProps) {
-  const [copied, setCopied] = useState(false)
+export function ApiKeyDisplay({ apiKey, onRevoke }: ApiKeyDisplayProps) {
+  const [showRevokeDialog, setShowRevokeDialog] = useState(false)
+  const [isRevoking, setIsRevoking] = useState(false)
+  const { success, error } = useToast()
+  const { useApiKeyUsage } = useApiKeys()
+  const { data: usage } = useApiKeyUsage(apiKey.id, 30)
 
-  const handleCopy = async () => {
-    if (!apiKeyData?.key) return
-    await navigator.clipboard.writeText(apiKeyData.key)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const handleRevoke = async () => {
+    try {
+      setIsRevoking(true)
+      await onRevoke(apiKey.id)
+      success({
+        description: "API key revoked successfully",
+      })
+      setShowRevokeDialog(false)
+    } catch {
+      error({
+        description: "Failed to revoke API key",
+      })
+    } finally {
+      setIsRevoking(false)
+    }
   }
 
+  const dailyUsage = usage?.usage_stats.current_daily_requests ?? 0
+  const dailyLimit = usage?.usage_stats.daily_limit ?? 100
+  const usagePercentage = (dailyUsage / dailyLimit) * 100
+  const remainingRequests = dailyLimit - dailyUsage
+  const dailyAverage = usage?.usage_stats.daily_average ?? 0
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>API Key Created</DialogTitle>
-          <DialogDescription>
-            Copy your API key now. You won&apos;t be able to see it again!
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="rounded-md bg-muted p-4">
-            <div className="text-sm font-mono break-all">{apiKeyData?.key}</div>
+    <>
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-start justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold">{apiKey.name}</h3>
+                <Badge variant={apiKey.key_type === "live" ? "default" : "secondary"}>
+                  {apiKey.key_type}
+                </Badge>
+                {apiKey.expires_at && (
+                  <Badge variant="outline">
+                    Expires {formatDistanceToNow(new Date(apiKey.expires_at), { addSuffix: true })}
+                  </Badge>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Created {formatDistanceToNow(new Date(apiKey.created_at), { addSuffix: true })}
+              </p>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical className="h-4 w-4" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => setShowRevokeDialog(true)}
+                >
+                  Revoke API Key
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-          <div className="text-sm text-muted-foreground">
-            <ul className="list-disc list-inside space-y-1">
-              <li>This key will only be shown once</li>
-              <li>Store it securely</li>
-              <li>Never share it publicly</li>
-              {apiKeyData?.api_key.expires_at && (
-                <li>Expires: {new Date(apiKeyData.api_key.expires_at).toLocaleDateString()}</li>
-              )}
-            </ul>
+
+          <div className="mt-4">
+            <div className="flex items-center justify-between text-sm">
+              <div>Daily Usage</div>
+              <div>
+                {formatNumber(dailyUsage)} / {formatNumber(dailyLimit)} requests
+              </div>
+            </div>
+            <Progress value={usagePercentage} className="mt-2" />
+            <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
+              <div>{formatNumber(remainingRequests)} requests remaining today</div>
+              <div>Daily average: {formatNumber(dailyAverage)} requests</div>
+            </div>
           </div>
-        </div>
-        <DialogFooter className="flex gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            onClick={handleCopy}
-          >
-            {copied ? (
-              <>
-                <Check className="mr-2 h-4 w-4" />
-                Copied
-              </>
-            ) : (
-              <>
-                <Copy className="mr-2 h-4 w-4" />
-                Copy to Clipboard
-              </>
-            )}
-          </Button>
-          <Button
-            type="button"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            Done
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+
+          <div className="mt-4 space-y-2">
+            <div className="text-sm font-medium">Permissions</div>
+            <div className="flex flex-wrap gap-2">
+              {apiKey.permissions.map((permission) => (
+                <Badge key={permission} variant="secondary">
+                  {permission}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={showRevokeDialog} onOpenChange={setShowRevokeDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Revoke API Key</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2">
+                <span className="flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  This action cannot be undone.
+                </span>
+                Are you sure you want to revoke this API key? Any applications using this key will
+                no longer be able to access the API.
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRevoke}
+              disabled={isRevoking}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isRevoking ? "Revoking..." : "Revoke Key"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

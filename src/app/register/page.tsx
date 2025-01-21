@@ -185,7 +185,7 @@ export default function Register() {
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-bold">Create your account</h2>
           <p className="mt-2 text-sm text-gray-600">
-            Join mailSage to start sending emails
+            Join MailSage to start sending emails
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

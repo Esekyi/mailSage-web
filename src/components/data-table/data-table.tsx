@@ -5,7 +5,9 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
-  SortingState,
+  getPaginationRowModel,
+  RowSelectionState,
+  OnChangeFn,
 } from '@tanstack/react-table'
 import {
   Table,
@@ -16,15 +18,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { useState } from 'react'
-import { PaginationParams } from '@/types/pagination'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -33,7 +27,8 @@ interface DataTableProps<TData, TValue> {
   currentPage: number
   perPage: number
   totalItems: number
-  onPaginationChange: (params: PaginationParams) => void
+  onPaginationChange: (params: { page: number; per_page: number }) => void
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>
 }
 
 export function DataTable<TData, TValue>({
@@ -44,75 +39,55 @@ export function DataTable<TData, TValue>({
   perPage,
   totalItems,
   onPaginationChange,
+  onRowSelectionChange,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([])
-
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     manualPagination: true,
-    manualSorting: true,
-    state: {
-      sorting,
-    },
-    onSortingChange: setSorting,
     pageCount,
+    state: {
+      pagination: {
+        pageIndex: currentPage - 1,
+        pageSize: perPage,
+      },
+      rowSelection: {},
+    },
+    onRowSelectionChange: onRowSelectionChange,
+    enableRowSelection: true,
   })
 
-
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-        </div>
-        <div className="flex items-center gap-2">
-          <Select
-            value={perPage.toString()}
-            onValueChange={(value) =>
-              onPaginationChange({ per_page: parseInt(value), page: 1 })
-            }
-          >
-            <SelectTrigger className="w-20">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {[10, 20, 30, 40, 50].map((size) => (
-                <SelectItem key={size} value={size.toString()}>
-                  {size}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <div className="text-sm text-muted-foreground">
-            Showing {(currentPage - 1) * perPage + 1} to{' '}
-            {Math.min(currentPage * perPage, totalItems)} of {totalItems}
-          </div>
-        </div>
-      </div>
-
+    <div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  )
+                })}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
@@ -136,24 +111,43 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-
-      <div className="flex items-center justify-end gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPaginationChange({ page: currentPage - 1 })}
-          disabled={currentPage === 1 || totalItems === 0}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPaginationChange({ page: currentPage + 1 })}
-          disabled={currentPage === pageCount || totalItems === 0}
-        >
-          Next
-        </Button>
+      <div className="flex items-center justify-between space-x-2 py-4">
+        <div className="text-sm text-muted-foreground">
+          {totalItems} total items
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const newPage = currentPage - 1
+              if (newPage > 0) {
+                onPaginationChange({ page: newPage, per_page: perPage })
+              }
+            }}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Previous
+          </Button>
+          <div className="text-sm font-medium">
+            Page {currentPage} of {pageCount}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const newPage = currentPage + 1
+              if (newPage <= pageCount) {
+                onPaginationChange({ page: newPage, per_page: perPage })
+              }
+            }}
+            disabled={currentPage === pageCount}
+          >
+            Next
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   )

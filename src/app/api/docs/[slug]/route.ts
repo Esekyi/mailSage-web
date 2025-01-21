@@ -27,7 +27,7 @@ export async function GET(
       toc,
       meta: data
     })
-  } catch (error) {
+} catch (_error) {
     return NextResponse.json(
       { error: 'Document not found' },
       { status: 404 }

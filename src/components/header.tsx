@@ -12,9 +12,13 @@ import {
   SheetTrigger,
   SheetTitle
 } from '@/components/ui/sheet'
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils'
 
-const Image = dynamic(() => import('next/image'), {ssr: false})
+// Use dynamic import for Image to avoid hydration issues
+const Image = dynamic(() => import('next/image'), {
+  ssr: false,
+  loading: () => <div className="w-8 h-8 bg-muted rounded-sm" />
+})
 
 interface HeaderProps {
   className?: string
@@ -106,13 +110,14 @@ export function Header({ className }: HeaderProps) {
         <Link href="/" className="flex items-center space-x-2">
           <Image
             src={theme === 'dark' ? '/navbarLogo-light.svg' : '/navbarLogo-dark.svg'}
-            alt="mailSage Logo"
+            alt="MailSage Logo"
             width={32}
             height={32}
+            priority
           />
-          <span className="font-semibold hidden md:inline">mailSage</span>
+          <span className="font-semibold md:inline hidden">MailSage</span>
         </Link>
-        <div className='flex-1' />
+        <div className="flex-1" />
         <nav className="hidden md:flex items-center space-x-4">
           {navigationItems}
         </nav>

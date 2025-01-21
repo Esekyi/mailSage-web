@@ -1,11 +1,12 @@
 "use client"
 
+import { Suspense } from "react"
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { apiConfig, fetchApi } from '@/lib/api-config'
 import { Loader2 } from 'lucide-react'
 
-export default function VerifyEmail() {
+function VerifyEmailContent() {
   const [isVerifying, setIsVerifying] = useState(true)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -24,7 +25,7 @@ export default function VerifyEmail() {
           body: JSON.stringify({ token }),
         })
         router.push('/verify-email/success')
-      } catch (error) {
+    } catch (_error) {
         router.push('/verify-email/error')
       } finally {
         setIsVerifying(false)
@@ -44,4 +45,12 @@ export default function VerifyEmail() {
   }
 
   return null
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<Loader2 className="h-8 w-8 animate-spin" />}>
+      <VerifyEmailContent />
+    </Suspense>
+  )
 }

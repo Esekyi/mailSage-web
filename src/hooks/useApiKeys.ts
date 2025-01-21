@@ -1,85 +1,82 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { axiosInstance } from '@/lib/axios'
-import type { AxiosError } from 'axios'
-import type {
-  CreateAPIKeyRequest,
-  CreateAPIKeyResponse,
-  APIKeysListResponse,
-  RevokeAPIKeyResponse,
-  APIKeyUsageResponse
-} from '@/types/api-keys'
-import { useToast } from '@/hooks/use-toast'
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { axiosInstance } from "@/lib/axios"
+import { AxiosError } from "axios"
+import { useToast } from "@/hooks/use-toast"
+import {
+  type APIKey,
+  type APIKeysListResponse,
+  type CreateAPIKeyRequest,
+  type ApiKeyUsageResponse,
+} from "@/types/api-keys"
+
+interface ApiErrorResponse {
+  error: string
+  errors?: Record<string, string[]>
+}
 
 export function useApiKeys() {
   const queryClient = useQueryClient()
-  const { success, error, warning } = useToast()
+  const { error } = useToast()
 
-  const { data: apiKeys, isLoading } = useQuery<APIKeysListResponse>({
-    queryKey: ['api-keys'],
+  const { data, isLoading } = useQuery<APIKeysListResponse, AxiosError<ApiErrorResponse>>({
+    queryKey: ["api-keys"],
     queryFn: async () => {
-      const { data } = await axiosInstance.get('/api/v1/api-keys')
-      return data
-    }
-  })
-
-  const createApiKey = useMutation<CreateAPIKeyResponse, AxiosError, CreateAPIKeyRequest>({
-    mutationFn: async (request) => {
-      const { data } = await axiosInstance.post('/api/v1/api-keys', {
-        ...request,
-        key_type: request.key_type.toLowerCase()
-      })
+      const { data } = await axiosInstance.get<APIKeysListResponse>("/api/v1/api-keys")
       return data
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['api-keys'] })
-      success({
-        description: "Your new API key has been created successfully."
-      })
+  })
+
+  const createApiKey = useMutation<
+    { api_key: APIKey; key: string },
+    AxiosError<ApiErrorResponse>,
+    CreateAPIKeyRequest
+  >({
+    mutationFn: async (data) => {
+      const response = await axiosInstance.post("/api/v1/api-keys", data)
+      return response.data
     },
     onError: (err) => {
       error({
-        title: "Error",
-        description: err.response?.data?.error || "Failed to create API key"
+        description: err.response?.data.error || "Failed to create API key",
       })
-    }
-  })
-
-  const revokeApiKey = useMutation<RevokeAPIKeyResponse, AxiosError, number>({
-    mutationFn: async (keyId) => {
-      const { data } = await axiosInstance.delete(`/api/v1/api-keys/${keyId}`)
-      return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['api-keys'] })
-      warning({
-        description: "The API key has been revoked successfully."
-      })
+      queryClient.invalidateQueries({ queryKey: ["api-keys"] })
+    },
+  })
+
+  const deleteApiKey = useMutation<void, AxiosError<ApiErrorResponse>, number>({
+    mutationFn: async (id) => {
+      await axiosInstance.delete(`/api/v1/api-keys/${id}`)
     },
     onError: (err) => {
       error({
-        title: "Error",
-        description: err.response?.data?.error || "Failed to revoke API key"
+        description: err.response?.data.error || "Failed to delete API key",
       })
-    }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["api-keys"] })
+    },
   })
 
-  const getKeyUsage = useMutation<APIKeyUsageResponse, AxiosError, { keyId: number, days?: number }>({
-    mutationFn: async ({ keyId, days = 30 }) => {
-      const { data } = await axiosInstance.get(`/api/v1/api-keys/${keyId}/usage`, {
-        params: { days }
-      })
-      return data
-    }
-  })
+  const useApiKeyUsage = (id: number, days = 30) => {
+    return useQuery<ApiKeyUsageResponse, AxiosError<ApiErrorResponse>>({
+      queryKey: ["api-key-usage", id, days],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<ApiKeyUsageResponse>(
+          `/api/v1/api-keys/${id}/usage?days=${days}`
+        )
+        return data
+      },
+      enabled: !!id,
+    })
+  }
 
   return {
-    apiKeys: apiKeys?.api_keys || [],
+    apiKeys: data?.api_keys || [],
     isLoading,
-    createApiKey: createApiKey.mutateAsync,
-    revokeApiKey: revokeApiKey.mutateAsync,
-    getKeyUsage: getKeyUsage.mutateAsync,
-    isCreating: createApiKey.isPending,
-    isRevoking: revokeApiKey.isPending,
-    isLoadingUsage: getKeyUsage.isPending
+    createApiKey,
+    deleteApiKey,
+    useApiKeyUsage,
   }
 }

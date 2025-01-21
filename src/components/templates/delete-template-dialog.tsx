@@ -8,13 +8,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Template } from "@/types/template"
+import { Template } from "@/types/templates"
 
 interface DeleteTemplateDialogProps {
   template: Template | null
   open: boolean
   onOpenChange: (open: boolean) => void
-  onConfirm: (template: Template) => void
+  onConfirm: (template: Template) => Promise<void>
 }
 
 export function DeleteTemplateDialog({

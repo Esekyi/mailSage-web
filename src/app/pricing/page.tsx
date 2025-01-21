@@ -31,11 +31,11 @@ export default function PricingPage() {
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow py-20">
-        <div className="container mx-auto">
+        <div className="container mx-auto px-4">
           <h1 className="text-4xl font-semibold text-center mb-12">Pricing Plans</h1>
           <div className="grid md:grid-cols-3 gap-8">
             {plans.map((plan) => (
-              <Card key={plan.name} className={`flex flex-col ${plan.popular ? 'border-primary' : ''}`}>
+              <Card key={plan.name} className={`flex flex-col ${plan.popular ? 'border-primary relative' : ''}`}>
                 <CardHeader>
                   <CardTitle>{plan.name}</CardTitle>
                   <CardDescription>{plan.description}</CardDescription>
@@ -67,8 +67,8 @@ export default function PricingPage() {
         </div>
       </main>
       <footer className="bg-secondary py-6 border-t border-border">
-        <div className="container mx-auto text-center text-muted-foreground">
-          <p>&copy; 2023 mailSage. All rights reserved.</p>
+        <div className="mt-6 pt-4 border-t border-border text-center text-sm text-muted-foreground">
+          <p>&copy; {new Date().getFullYear()} MailSage. All rights reserved.</p>
         </div>
       </footer>
     </div>

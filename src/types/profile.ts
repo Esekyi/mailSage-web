@@ -25,7 +25,7 @@ export interface NotificationSettings {
 
 export interface ProfileResponse {
   profile: UserProfile;
-  preferences: Record<string, any>;
+preferences: Record<string, unknown>;
   notifications_settings: NotificationSettings;
 }
 

@@ -22,11 +22,11 @@ export function DashboardHeader() {
         <Link href="/dashboard" className="flex items-center space-x-2">
           <Image
             src={theme === 'dark' ? '/navbarLogo-light.svg' : '/navbarLogo-dark.svg'}
-            alt="mailSage Logo"
+            alt="MailSage Logo"
             width={32}
             height={32}
           />
-          <span className="font-semibold gradient-text">mailSage</span>
+          <span className="font-semibold gradient-text">MailSage</span>
         </Link>
         <nav className="ml-auto flex items-center space-x-4">
           <Link href="/docs" className="text-sm font-medium text-muted-foreground hover:text-foreground">

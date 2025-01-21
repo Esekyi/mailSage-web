@@ -1,7 +1,7 @@
 import { Header } from '@/components/header'
-import { DocsSidebar } from '@/components/docs/docs-sidebar'
-import { DocsTableOfContents } from '@/components/docs/docs-toc'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { DocsSidebar } from '@/components/docs/navigation/docs-sidebar'
+import { DocsTableOfContents } from '@/components/docs/navigation/docs-toc'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Menu } from 'lucide-react'
 
@@ -24,6 +24,9 @@ export default function DocsLayout({
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="pr-0">
+              <SheetHeader>
+                <SheetTitle>Mailsage Docs</SheetTitle>
+              </SheetHeader>
               <DocsSidebar />
             </SheetContent>
           </Sheet>
@@ -61,6 +64,9 @@ export default function DocsLayout({
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[90vw] sm:w-[350px]">
+              <SheetHeader>
+                <SheetTitle>On this page</SheetTitle>
+              </SheetHeader>
               <DocsTableOfContents />
             </SheetContent>
           </Sheet>

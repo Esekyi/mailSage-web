@@ -22,20 +22,48 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
-import { Loader2, Eye, EyeOff } from 'lucide-react'
+import { Loader2, Eye, EyeOff, Mail, Globe, Hash } from 'lucide-react'
 import { CreateSMTPConfig, SMTPConfig } from '@/types/smtp'
 import { omit } from 'lodash'
+import { Label } from '@/components/ui/label'
 
 // Separate schemas for each step
 const step1Schema = z.object({
   name: z.string().min(1, 'Name is required'),
-  from_email: z.string().email('Invalid email address'),
+  from_email: z.string().email('Invalid email address').min(1, 'From email is required'),
 })
 
+// Add SMTP presets
+const SMTP_PRESETS = {
+  GMAIL: {
+    host: 'smtp.gmail.com',
+    port: 587,
+    use_tls: true,
+  },
+  OUTLOOK: {
+    host: 'smtp.office365.com',
+    port: 587,
+    use_tls: true,
+  },
+  // Add more presets as needed
+}
+
+// Add host validation
 const step2Schema = z.object({
-  host: z.string().min(1, 'Host is required'),
-  port: z.coerce.number().min(1, 'Port is required'),
-  username: z.string().min(1, 'Username is required'),
+  host: z.string().min(1, 'Host is required')
+    .refine(value => {
+      // Add specific validation for known SMTP providers
+      if (value.toLowerCase().includes('gmail')) {
+        return value === 'smtp.gmail.com'
+      }
+      return value.includes('.')
+    }, {
+      message: 'Invalid host. For Gmail, use smtp.gmail.com'
+    }),
+  port: z.coerce.number()
+    .min(1, 'Port is required')
+    .max(65535, 'Port must be between 1 and 65535'),
+  username: z.string().email('Username must be a valid email address').min(1, 'Username is required'),
   password: z.string().min(1, 'Password is required'),
 })
 
@@ -124,7 +152,7 @@ export function SMTPForm({
 
       await onSubmit(submitData)
       onOpenChange(false)
-    } catch (error) {
+    } catch (_error) {
       // Error handling is done in the parent component
     }
   }
@@ -168,6 +196,14 @@ export function SMTPForm({
     }
   }
 
+  // Add preset selection
+  const handlePresetSelect = (preset: keyof typeof SMTP_PRESETS) => {
+    const presetConfig = SMTP_PRESETS[preset]
+    form.setValue('host', presetConfig.host)
+    form.setValue('port', presetConfig.port)
+    form.setValue('use_tls', presetConfig.use_tls)
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -190,7 +226,10 @@ export function SMTPForm({
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="My SMTP Server" />
+                        <div className="relative">
+                          <Input {...field} placeholder="My SMTP Server" />
+                          <Mail className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -203,7 +242,10 @@ export function SMTPForm({
                     <FormItem>
                       <FormLabel>From Email</FormLabel>
                       <FormControl>
-                        <Input {...field} type="email" placeholder="noreply@example.com" />
+                        <div className="relative">
+                          <Input {...field} type="email" placeholder="noreply@example.com" />
+                          <Mail className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -214,32 +256,88 @@ export function SMTPForm({
 
             {step === 2 && (
               <>
+                <div className="mb-4">
+                  <Label>Quick Setup</Label>
+                  <div className="flex gap-2 mt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePresetSelect('GMAIL')}
+                    >
+                      Gmail
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePresetSelect('OUTLOOK')}
+                    >
+                      Outlook
+                    </Button>
+                  </div>
+                </div>
+
                 <FormField
                   control={form.control}
                   name="host"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Host</FormLabel>
+                      <FormLabel>SMTP Host</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="smtp.example.com" />
+                        <div className="relative">
+                          <Input {...field} placeholder="smtp.gmail.com" />
+                          <Globe className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        </div>
                       </FormControl>
+                      <FormDescription>
+                        For Gmail, use smtp.gmail.com
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="port"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Port</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="number" placeholder="587" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="port"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Port</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input {...field} type="number" placeholder="587" />
+                            <Hash className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="use_tls"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel>Use TLS</FormLabel>
+                          <FormDescription>
+                            Required for Gmail
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
                   name="username"
@@ -247,41 +345,52 @@ export function SMTPForm({
                     <FormItem>
                       <FormLabel>Username</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <div className="relative">
+                          <Input {...field} type="email" placeholder="your.email@gmail.com" />
+                          <Mail className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        </div>
                       </FormControl>
+                      <FormDescription>
+                        For Gmail, use your full email address
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        Password {mode === 'edit' && "(Enter your SMTP password)"}
-                      </FormLabel>
+                      <FormLabel>Password</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Input
                             {...field}
                             type={showPassword ? "text" : "password"}
+                            placeholder={mode === 'edit' ? "Leave blank to keep existing password" : "Enter password"}
                           />
-                          <Button
+                          <button
                             type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                             onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
                           >
                             {showPassword ? (
                               <EyeOff className="h-4 w-4" />
                             ) : (
                               <Eye className="h-4 w-4" />
                             )}
-                          </Button>
+                          </button>
                         </div>
                       </FormControl>
+                      <FormDescription>
+                        {mode === 'create' ? (
+                          'For Gmail, use an App Password if 2FA is enabled'
+                        ) : (
+                          'Leave blank to keep the existing password'
+                        )}
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

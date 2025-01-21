@@ -32,7 +32,7 @@ axiosInstance.interceptors.response.use(
 
         // Try to refresh the token
         const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/v1/refresh`,
           {},
           {
             headers: {

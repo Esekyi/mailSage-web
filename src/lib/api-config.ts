@@ -94,7 +94,7 @@ export async function fetchApi<T>(
             // Retry original request with new token
             return fetchApi<T>(endpoint, options);
           }
-        } catch (refreshError) {
+        } catch (_refreshError) {
           // Handle refresh failure
           localStorage.removeItem('authToken');
           localStorage.removeItem('refreshToken');
