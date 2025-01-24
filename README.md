@@ -1,4 +1,4 @@
-# ![mailSage](public/navbarLogo-dark.svg) Mailsage web Dashboard
+# ![mailSage](public/navbarLogo-dark.svg) Mailsage web Dashboard.
 
 A modern web dashboard for managing email configurations and monitoring email delivery services. Built with Next.js 14, TypeScript, and Tailwind CSS. 
 
