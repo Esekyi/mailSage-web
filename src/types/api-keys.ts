@@ -8,10 +8,9 @@ export interface APIKey {
   key_prefix: string;
   key_type: 'test' | 'live';
   permissions: APIKeyPermission[];
-  last_used_at: string | null;
-  expires_at: string | null;
-  is_active: boolean;
   created_at: string;
+  expires_at: string | null;
+  last_used_at: string | null;
   daily_requests: number;
 }
 
@@ -23,35 +22,30 @@ export interface CreateAPIKeyRequest {
 }
 
 export interface CreateAPIKeyResponse {
-  message: string;
-  api_key: {
-    id: number;
-    name: string;
-    key_prefix: string;
-    key_type: 'test' | 'live';
-    permissions: string[];
-    expires_at: string | null;
-    is_active: boolean;
-    created_at: string;
-  };
-  key: string;
+  api_key: APIKey
+  key: string
 }
 
 export interface APIKeysListResponse {
   api_keys: APIKey[];
 }
 
-export interface APIKeyUsageStats {
+export interface ApiKeyUsageStats {
   total_requests: number;
   success_requests: number;
   error_requests: number;
   success_rate: number;
-  endpoint_usage: Record<string, number>;
+  current_daily_requests: number;
   daily_average: number;
+  days_analyzed: number;
+  last_used_at: string | null;
+  endpoint_usage: Record<string, number>;
+  daily_limit: number;
+  daily_remaining: number;
 }
 
-export interface APIKeyUsageResponse {
-  usage_stats: APIKeyUsageStats;
+export interface ApiKeyUsageResponse {
+  usage_stats: ApiKeyUsageStats;
 }
 
 export interface RevokeAPIKeyResponse {

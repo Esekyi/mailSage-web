@@ -7,6 +7,7 @@ import type { AxiosError } from 'axios'
 interface ApiErrorResponse {
   error: string;
   errors?: Record<string, string[]>;
+  details?: string;
 }
 
 interface TestEmailParams {
@@ -28,6 +29,10 @@ export function useSmtp() {
 
   const createSmtp = useMutation<SMTPResponse, AxiosError<ApiErrorResponse>, CreateSMTPConfig>({
     mutationFn: async (config) => {
+      if (config.host.includes('gmail.com') && !config.use_tls) {
+        throw new Error('Gmail SMTP requires TLS to be enabled')
+      }
+
       const { data } = await axiosInstance.post('/api/v1/smtp/configs', config)
       return data
     },
@@ -38,8 +43,19 @@ export function useSmtp() {
       })
     },
     onError: (err) => {
+      const errorMessage = err.response?.data?.error || err.response?.data?.details || "Failed to create SMTP configuration"
+
+      if (errorMessage.toLowerCase().includes('authentication failed')) {
+        error({
+          title: "Gmail Authentication Failed",
+          description: "Make sure you're using an App Password if 2FA is enabled on your Gmail account."
+        })
+        return
+      }
+
       error({
-        description: err.response?.data?.error || "Failed to create SMTP configuration",
+        title: "SMTP Configuration Error",
+        description: errorMessage
       })
     }
   })

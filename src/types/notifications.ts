@@ -6,7 +6,7 @@ export interface Notification {
   type: 'success' | 'error' | 'warning' | 'info';
   created_at: string;
   read_at: string | null;
-  meta_data?: Record<string, any>;
+meta_data?: Record<string, unknown>;
 }
 
 export interface NotificationsResponse {

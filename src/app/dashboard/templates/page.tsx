@@ -1,25 +1,26 @@
 'use client'
 
 import { useState } from 'react'
-import { useDeleteTemplate, useTemplates } from '@/hooks/useTemplates'
-import { Template } from '@/types/template'
+import { useTemplates } from '@/hooks/useTemplates'
+import { Template, TemplateApiError } from '@/types/templates'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { DataTable } from '@/components/data-table/data-table'
 import { EditTemplateDialog } from './edit-template-dialog'
+import { VersionHistory } from './version-history'
 import { columns } from './columns'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { DeleteTemplateDialog } from '@/components/templates/delete-template-dialog'
 import { Skeleton } from "@/components/ui/skeleton"
-import { ApiError } from '@/lib/api-config'
+import { AxiosError } from 'axios'
 
 function LoadingState() {
   return (
     <div className="space-y-4">
-      {[...Array(3)].map((_, i) => (
-        <div key={i} className="flex items-center justify-between p-4">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={`loading-skeleton-${i}`} className="flex items-center justify-between p-4">
           <div className="space-y-2">
             <Skeleton className="h-4 w-[250px]" />
             <Skeleton className="h-4 w-[200px]" />
@@ -46,11 +47,11 @@ export default function TemplatesPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null)
 
-  const { data, isLoading } = useTemplates(params)
-  const deleteTemplate = useDeleteTemplate()
-  const { success, error } = useToast()
+  const { templates, pagination, isLoading, deleteTemplate } = useTemplates(params)
+  const toast = useToast()
 
   const handleEdit = (template: Template) => {
     setSelectedTemplate(template)
@@ -58,14 +59,19 @@ export default function TemplatesPage() {
     setIsCreateDialogOpen(false)
   }
 
-  const handleDelete = async (template: Template) => {
+  const handleDelete = (template: Template) => {
     setTemplateToDelete(template)
+  }
+
+  const handleViewHistory = (template: Template) => {
+    setSelectedTemplate(template)
+    setIsHistoryOpen(true)
   }
 
   const tableColumns = columns({
     onEdit: handleEdit,
     onDelete: handleDelete,
-    onViewHistory: undefined
+    onViewHistory: handleViewHistory
   })
 
   const handleCreate = () => {
@@ -77,18 +83,24 @@ export default function TemplatesPage() {
   const handleConfirmDelete = async (template: Template) => {
     try {
       await deleteTemplate.mutateAsync(template.id)
-      success({
+      toast.success({
         title: "Success",
         description: "Template deleted successfully"
       })
       setTemplateToDelete(null)
-    } catch (err) {
-      const apiError = err as ApiError
-      error({
+    } catch (error) {
+      const apiError = error as AxiosError<TemplateApiError>
+      toast.error({
         title: "Error",
-        description: apiError.message || "Failed to delete template",
+        description: apiError.response?.data?.error || "Failed to delete template"
       })
     }
+  }
+
+  const handleVersionSelect = (version: Template) => {
+    setSelectedTemplate(version)
+    setIsHistoryOpen(false)
+    setIsEditDialogOpen(true)
   }
 
   return (
@@ -124,7 +136,7 @@ export default function TemplatesPage() {
                 <div className="rounded-md border">
                   <LoadingState />
                 </div>
-              ) : data?.items?.length === 0 ? (
+              ) : templates?.length === 0 ? (
                 <div className="text-center py-10">
                   <div className="text-sm text-muted-foreground mb-4">No templates found</div>
                   <Button onClick={handleCreate}>
@@ -135,11 +147,11 @@ export default function TemplatesPage() {
               ) : (
                 <DataTable
                   columns={tableColumns}
-                  data={data?.items ?? []}
-                  pageCount={data?.total_pages ?? 0}
+                  data={templates ?? []}
+                  pageCount={pagination?.pages ?? 0}
                   currentPage={params.page}
                   perPage={params.per_page}
-                  totalItems={data?.total ?? 0}
+                  totalItems={pagination?.total ?? 0}
                   onPaginationChange={(newParams) =>
                     setParams(prev => ({ ...prev, ...newParams }))
                   }
@@ -153,7 +165,7 @@ export default function TemplatesPage() {
       <EditTemplateDialog
         template={selectedTemplate}
         open={isEditDialogOpen || isCreateDialogOpen}
-        onOpenChange={(open) => {
+        onOpenChange={(open: boolean) => {
           if (!open) {
             setIsEditDialogOpen(false)
             setIsCreateDialogOpen(false)
@@ -169,10 +181,20 @@ export default function TemplatesPage() {
           setParams(prev => ({ ...prev }))
         }}
       />
+
+      {selectedTemplate && (
+        <VersionHistory
+          templateId={selectedTemplate.id}
+          open={isHistoryOpen}
+          onOpenChange={setIsHistoryOpen}
+          onVersionSelect={handleVersionSelect}
+        />
+      )}
+
       <DeleteTemplateDialog
         template={templateToDelete}
         open={!!templateToDelete}
-        onOpenChange={(open) => !open && setTemplateToDelete(null)}
+        onOpenChange={(open: boolean) => !open && setTemplateToDelete(null)}
         onConfirm={handleConfirmDelete}
       />
     </div>

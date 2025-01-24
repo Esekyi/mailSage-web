@@ -7,7 +7,7 @@ import { TimezoneSelector } from '@/components/preferences/timezone-selector'
 import { NotificationSettings } from '@/types/preferences'
 import { Loader2 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export function PreferencesTab() {
   const {
@@ -21,6 +21,12 @@ export function PreferencesTab() {
     theme,
     setTheme,
   } = useThemePreference()
+
+  const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>('light')
+
+  useEffect(() => {
+    setSystemTheme(window?.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+  }, [])
 
   useEffect(() => {
     if (!isPreferencesLoading && preferences?.theme && theme !== preferences.theme) {
@@ -83,10 +89,10 @@ export function PreferencesTab() {
       <div className="grid gap-6">
         <div className="grid gap-4 md:grid-cols-2">
           <ThemeSelector
-            theme={theme === 'system' ? (window?.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme as 'light' | 'dark'}
+            theme={theme === 'system' ? systemTheme : theme as 'light' | 'dark'}
             onChange={handleThemeChange}
             disabled={isUpdating || isPreferencesLoading}
-            description="Choose your default theme preference. This will be saved to your account."
+            // description="Choose your default theme preference. This will be saved to your account."
           />
 
           <TimezoneSelector

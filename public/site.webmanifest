@@ -1,6 +1,6 @@
 {
-  "name": "mailSage",
-  "short_name": "mailSage",
+  "name": "MailSage",
+  "short_name": "MailSage",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

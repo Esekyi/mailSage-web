@@ -569,6 +569,27 @@
     aria-hidden "^1.1.1"
     react-remove-scroll "^2.6.1"
 
+"@radix-ui/react-popover@^1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-popover/-/react-popover-1.1.4.tgz#d83104e5fb588870a673b55f3387da4844e5836e"
+  integrity sha512-aUACAkXx8LaFymDma+HQVji7WhvEhpFJ7+qPz17Nf4lLZqtreGOFRiNQWQmhzp7kEWg9cOyyQJpdIMUMPc/CPw==
+  dependencies:
+    "@radix-ui/primitive" "1.1.1"
+    "@radix-ui/react-compose-refs" "1.1.1"
+    "@radix-ui/react-context" "1.1.1"
+    "@radix-ui/react-dismissable-layer" "1.1.3"
+    "@radix-ui/react-focus-guards" "1.1.1"
+    "@radix-ui/react-focus-scope" "1.1.1"
+    "@radix-ui/react-id" "1.1.0"
+    "@radix-ui/react-popper" "1.2.1"
+    "@radix-ui/react-portal" "1.1.3"
+    "@radix-ui/react-presence" "1.1.2"
+    "@radix-ui/react-primitive" "2.0.1"
+    "@radix-ui/react-slot" "1.1.1"
+    "@radix-ui/react-use-controllable-state" "1.1.0"
+    aria-hidden "^1.1.1"
+    react-remove-scroll "^2.6.1"
+
 "@radix-ui/react-popper@1.2.1":
   version "1.2.1"
   resolved "https://registry.npmjs.org/@radix-ui/react-popper/-/react-popper-1.2.1.tgz"
@@ -746,6 +767,24 @@
     "@radix-ui/react-use-callback-ref" "1.1.0"
     "@radix-ui/react-use-controllable-state" "1.1.0"
     "@radix-ui/react-use-layout-effect" "1.1.0"
+    "@radix-ui/react-visually-hidden" "1.1.1"
+
+"@radix-ui/react-tooltip@^1.1.6":
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-tooltip/-/react-tooltip-1.1.6.tgz#eab98e9a5c876ef0abfae3cfeee229870528ed06"
+  integrity sha512-TLB5D8QLExS1uDn7+wH/bjEmRurNMTzNrtq7IjaS4kjion9NtzsTGkvR5+i7yc9q01Pi2KMM2cN3f8UG4IvvXA==
+  dependencies:
+    "@radix-ui/primitive" "1.1.1"
+    "@radix-ui/react-compose-refs" "1.1.1"
+    "@radix-ui/react-context" "1.1.1"
+    "@radix-ui/react-dismissable-layer" "1.1.3"
+    "@radix-ui/react-id" "1.1.0"
+    "@radix-ui/react-popper" "1.2.1"
+    "@radix-ui/react-portal" "1.1.3"
+    "@radix-ui/react-presence" "1.1.2"
+    "@radix-ui/react-primitive" "2.0.1"
+    "@radix-ui/react-slot" "1.1.1"
+    "@radix-ui/react-use-controllable-state" "1.1.0"
     "@radix-ui/react-visually-hidden" "1.1.1"
 
 "@radix-ui/react-use-callback-ref@1.1.0":
@@ -1679,7 +1718,7 @@ data-view-byte-offset@^1.0.1:
 
 date-fns@^4.1.0:
   version "4.1.0"
-  resolved "https://registry.npmjs.org/date-fns/-/date-fns-4.1.0.tgz"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-4.1.0.tgz#64b3d83fff5aa80438f5b1a633c2e83b8a1c2d14"
   integrity sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==
 
 dayjs@^1.11.13:
@@ -2310,6 +2349,15 @@ format@^0.2.0:
   version "0.2.2"
   resolved "https://registry.npmjs.org/format/-/format-0.2.2.tgz"
   integrity sha512-wzsgA6WOq+09wrU1tsJ09udeR/YZRaeArL9e1wPbFg3GG2yDnC2ldKpxs4xunpFF9DgqCqOIra3bc1HWrJ37Ww==
+
+framer-motion@^11.16.0:
+  version "11.16.0"
+  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-11.16.0.tgz#6592689bc8d6422207a55e48297eae99e9aa2eb2"
+  integrity sha512-oL2AWqLQuw0+CNEUa0sz3mWC/n3i147CckvpQn8bLRs30b+HxTxlRi0YR2FpHHhAbWV7DKjNdHU42KHLfBWh/g==
+  dependencies:
+    motion-dom "^11.16.0"
+    motion-utils "^11.16.0"
+    tslib "^2.4.0"
 
 fsevents@~2.3.2:
   version "2.3.3"
@@ -3456,6 +3504,18 @@ minimist@^1.2.0, minimist@^1.2.6:
   resolved "https://registry.npmjs.org/minipass/-/minipass-7.1.2.tgz"
   integrity sha512-qOOzS1cBTWYF4BH8fVePDBOO9iptMnGUEZwNc/cMWnTV2nVLZ7VoNWEPHkYczZA0pdoA7dl6e7FL659nX9S2aw==
 
+motion-dom@^11.16.0:
+  version "11.16.0"
+  resolved "https://registry.yarnpkg.com/motion-dom/-/motion-dom-11.16.0.tgz#1766e4f9ada72c30ba8f3e698774372fcbcc95b3"
+  integrity sha512-4bmEwajSdrljzDAYpu6ceEdtI4J5PH25fmN8YSx7Qxk6OMrC10CXM0D5y+VO/pFZjhmCvm2bGf7Rus482kwhzA==
+  dependencies:
+    motion-utils "^11.16.0"
+
+motion-utils@^11.16.0:
+  version "11.16.0"
+  resolved "https://registry.yarnpkg.com/motion-utils/-/motion-utils-11.16.0.tgz#e75865442278be49e411ca9105c9139edc572811"
+  integrity sha512-ngdWPjg31rD4WGXFi0eZ00DQQqKKu04QExyv/ymlC+3k+WIgYVFbt6gS5JsFPbJODTF/r8XiE/X+SsoT9c0ocw==
+
 ms@^2.1.1, ms@^2.1.3:
   version "2.1.3"
   resolved "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz"
@@ -3818,6 +3878,11 @@ queue-microtask@^1.2.2:
   version "1.2.3"
   resolved "https://registry.npmjs.org/queue-microtask/-/queue-microtask-1.2.3.tgz"
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
+
+react-day-picker@8.10.1:
+  version "8.10.1"
+  resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-8.10.1.tgz#4762ec298865919b93ec09ba69621580835b8e80"
+  integrity sha512-TMx7fNbhLk15eqcMt+7Z7S2KF7mfTId/XJDjKE8f+IUcFn0l08/kI4FiYTL/0yuOLmEcbR4Fwe3GJf/NiiMnPA==
 
 react-dom@^19.0.0:
   version "19.0.0"

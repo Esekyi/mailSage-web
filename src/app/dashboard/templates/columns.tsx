@@ -1,7 +1,7 @@
 'use client'
 
 import { ColumnDef } from '@tanstack/react-table'
-import { Template } from '@/types/template'
+import { Template } from '@/types/templates'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -44,10 +44,10 @@ export const columns = ({
     cell: ({ row }) => (
       <div className="hidden md:flex items-center gap-2">
         <span>v{row.original.version}</span>
-        {row.original.version_info.is_latest && (
-          <Badge variant="secondary">Latest</Badge>
+        {row.original.version_info.has_versions && (
+          <Badge variant="secondary">Has History</Badge>
         )}
-        {row.original.version_info.published_at && (
+        {row.original.published_at && (
           <Badge>Published</Badge>
         )}
       </div>
@@ -83,7 +83,7 @@ export const columns = ({
               <Edit className="mr-2 h-4 w-4" />
               <span>Edit</span>
             </DropdownMenuItem>
-            {onViewHistory && (
+            {onViewHistory && template.version_info.has_versions && (
               <DropdownMenuItem onClick={() => onViewHistory(template)}>
                 <History className="mr-2 h-4 w-4" />
                 <span>History</span>

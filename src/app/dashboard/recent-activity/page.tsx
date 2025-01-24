@@ -65,6 +65,39 @@ export function RecentActivity() {
     setPage(1) // Reset to first page when changing items per page
   }
 
+  const renderPaginationButtons = () => {
+    if (!activities?.total_pages) return null
+
+    const totalPages = activities.total_pages
+    let startPage = Math.max(1, page - 2)
+    let endPage = Math.min(totalPages, page + 2)
+
+    // Adjust the range if we're near the start or end
+    if (page <= 3) {
+      endPage = Math.min(5, totalPages)
+    }
+    if (page >= totalPages - 2) {
+      startPage = Math.max(1, totalPages - 4)
+    }
+
+    const pages = []
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <Button
+          key={`page-${i}`}
+          variant={page === i ? "default" : "outline"}
+          size="sm"
+          onClick={() => handlePageChange(i)}
+          className="w-8"
+        >
+          {i}
+        </Button>
+      )
+    }
+
+    return pages
+  }
+
   if (isLoading) {
     return <RecentActivitySkeleton />
   }
@@ -104,7 +137,7 @@ export function RecentActivity() {
           </TableHeader>
           <TableBody>
             {activities?.items.map((activity) => (
-              <TableRow key={activity.id}>
+              <TableRow key={`activity-${page}-${activity.id}-${activity.created_at}`}>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <span>{getActivityIcon(activity.type)}</span>
@@ -158,20 +191,7 @@ export function RecentActivity() {
               Previous
             </Button>
             <div className="flex items-center gap-1">
-              {(activities?.total_pages ?? 0) > 0 && Array.from(
-                { length: activities?.total_pages ?? 0 },
-                (_, i) => (
-                  <Button
-                    key={i + 1}
-                    variant={page === i + 1 ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handlePageChange(i + 1)}
-                    className="w-8"
-                  >
-                    {i + 1}
-                  </Button>
-                )
-              ).slice(Math.max(0, page - 3), Math.min(activities?.total_pages ?? 0, page + 2))}
+              {renderPaginationButtons()}
             </div>
             <Button
               variant="outline"
@@ -188,7 +208,6 @@ export function RecentActivity() {
     </Card>
   )
 }
-
 
 function RecentActivitySkeleton() {
   return (
@@ -208,7 +227,7 @@ function RecentActivitySkeleton() {
           </TableHeader>
           <TableBody>
             {Array(5).fill(null).map((_, i) => (
-              <TableRow key={i}>
+              <TableRow key={`skeleton-row-${i}`}>
                 <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                 <TableCell><Skeleton className="h-4 w-48" /></TableCell>
                 <TableCell><Skeleton className="h-4 w-20" /></TableCell>

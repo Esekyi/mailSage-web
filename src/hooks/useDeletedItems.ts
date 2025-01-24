@@ -27,7 +27,7 @@ export function useDeletedItems() {
         description: data.message
       })
     },
-    onError: (err: any) => {
+    onError: (err: Error | { response?: { data?: { error?: string } } }) => {
       error({
         title: "Oops!",
         description: err.response?.data?.error || "Failed to restore template",
@@ -47,7 +47,7 @@ export function useDeletedItems() {
         description: data.message
       })
     },
-    onError: (err: any) => {
+    onError: (err: Error | { response?: { data?: { error?: string } } }) => {
       error({
         title: "Oops!",
         description: err.response?.data?.error || "Failed to restore SMTP",
@@ -69,7 +69,7 @@ export function useDeletedItems() {
         description: data.message
       })
     },
-    onError: (err: any) => {
+    onError: (err: Error | { response?: { data?: { error?: string } } }) => {
       error({
         title: "Error!",
         description: err.response?.data?.error || "Failed to delete template",
@@ -91,7 +91,7 @@ export function useDeletedItems() {
         description: data.message
       })
     },
-    onError: (err: any) => {
+    onError: (err: Error | { response?: { data?: { error?: string } } }) => {
       error({
         title: "Error!",
         description: err.response?.data?.error || "Failed to delete SMTP",
@@ -113,7 +113,7 @@ export function useDeletedItems() {
         description: data.message
       })
     },
-    onError: (err: any) => {
+    onError: (err: Error | { response?: { data?: { error?: string } } }) => {
       error({
         title: "Error!",
         description: err.response?.data?.error || "Failed to delete all templates",
@@ -135,7 +135,7 @@ export function useDeletedItems() {
         description: data.message
       })
     },
-    onError: (error: any) => {
+    onError: (error: Error | { response?: { data?: { error?: string } } }) => {
       error({
         title: "Error",
         description: error.response?.data?.error || "Failed to delete all SMTP configs",

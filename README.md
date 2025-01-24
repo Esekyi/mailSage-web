@@ -52,7 +52,7 @@ Mailsage Dashboard provides a centralized interface for:
 
 ## Project Structure
 
-```
+```bash
 src/
 ├── app/ # Next.js app router pages
 ├── components/ # Reusable React components

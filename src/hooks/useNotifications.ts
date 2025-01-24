@@ -33,7 +33,7 @@ export function useNotifications(page = 1, per_page = 12) {
       })
       return data
     },
-    onSuccess: (data) => {
+    onSuccess: (_data) => {
       // Invalidate queries to refetch data
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
       queryClient.invalidateQueries({ queryKey: ['notifications-unread'] })
@@ -43,7 +43,7 @@ export function useNotifications(page = 1, per_page = 12) {
         description: "Notifications marked as read",
       })
     },
-    onError: (err: any) => {
+    onError: (err: Error | { response?: { data?: { error?: string } } }) => {
       error({
         title: "Oops!",
         description: err.response?.data?.error || "Failed to mark notifications as read",

@@ -27,7 +27,7 @@ export default function ResendVerificationPage() {
         description: "Please check your inbox for the verification link.",
       })
       router.push('/login')
-    } catch (err) {
+    } catch (_err) {
       error({
         title: "Error",
         description: "Failed to resend verification email. Please try again.",
