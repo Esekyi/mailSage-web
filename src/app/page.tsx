@@ -8,7 +8,7 @@ import { Header } from '@/components/header'
 import { ArrowRight, Mail, Lock, Zap, BarChart3, Server, Repeat, Terminal, Copy, CheckCircle } from 'lucide-react'
 
 const companies = [
-  { name: 'GitHub', logo: '/logos/github.svg' },
+  { name: 'GitHub', logo: '/logos/github5.svg' },
   { name: 'Google', logo: '/logos/google.svg' },
   { name: 'Microsoft', logo: '/logos/microsoft.svg' },
   { name: 'Amazon', logo: '/logos/amazon.svg' },

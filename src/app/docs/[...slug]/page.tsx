@@ -4,13 +4,19 @@ import { DocContent } from '@/components/docs/content/doc-content'
 import { AxiosError } from 'axios'
 
 interface DocPageProps {
-  params: {
+  params: Promise<{
     slug: string[]
-  }
+  }>
 }
 
 export default async function DocPage({ params }: DocPageProps) {
-  const slug = params.slug.join('/')
+  const resolvedParams = await params
+
+  if (!resolvedParams?.slug) {
+    notFound()
+  }
+
+  const slug = resolvedParams.slug.join('/')
 
   try {
     const { data } = await axiosInstance.get(`/api/v1/docs/${slug}`)
