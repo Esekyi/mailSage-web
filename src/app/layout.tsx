@@ -3,12 +3,16 @@ import { Providers } from '@/app/providers'
 import './globals.css'
 import '@/styles/docs/github-markdown.css'
 import '@/styles/docs/prism-github.css'
+import { Metadata } from 'next'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata = {
-  title: 'MailSage',
-  description: 'Email management platform for developers and businesses',
+export const metadata: Metadata = {
+  title: {
+    template: '%s | MailSage',
+    default: 'MailSage - Email Management Made Simple'
+  },
+  description: 'Modern email infrastructure for developers and businesses',
   icons: [
     {
       rel: 'icon',

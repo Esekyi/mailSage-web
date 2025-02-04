@@ -14,17 +14,21 @@ const companies = [
   { name: 'Amazon', logo: '/logos/amazon.svg' },
 ]
 
-const codeExample = `curl -X POST https://api.mailsage.io/v1/send \\
+const codeExample = `curl -X POST https://api.mailsage.vylis.tech/v1/send \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "to": "user@example.com",
     "subject": "Welcome to MailSage!",
-    "template_id": "welcome-email",
-    "variables": {
-      "name": "John Doe",
-      "company": "Acme Inc"
-    }
+    "template_id": "1213",
+    "smtp_id": "1234567890",
+    "recipient":
+        {
+            "email": "john.doe@example.com",
+            "variables": {
+                "name": "John Doe",
+                "company": "Acme Inc"
+            }
+        }
   }'`
 
 export default function LandingPage() {

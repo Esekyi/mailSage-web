@@ -27,13 +27,13 @@ export function useNotifications(page = 1, per_page = 12) {
   })
 
   const markAsReadMutation = useMutation<MarkAsReadResponse, Error, number[]>({
-    mutationFn: async (notificationIds) => {
+    mutationFn: async (notificationIds: number[]) => {
       const { data } = await axiosInstance.post('/api/v1/profile/notifications/read', {
         notification_ids: notificationIds
       })
       return data
     },
-    onSuccess: (_data) => {
+    onSuccess: () => {
       // Invalidate queries to refetch data
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
       queryClient.invalidateQueries({ queryKey: ['notifications-unread'] })
@@ -44,9 +44,12 @@ export function useNotifications(page = 1, per_page = 12) {
       })
     },
     onError: (err: Error | { response?: { data?: { error?: string } } }) => {
+      const errorMessage = (err as { response?: { data?: { error?: string } } }).response?.data?.error ||
+                          "Failed to mark notifications as read"
+
       error({
         title: "Oops!",
-        description: err.response?.data?.error || "Failed to mark notifications as read",
+        description: errorMessage,
       })
     }
   })
