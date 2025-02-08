@@ -12,14 +12,15 @@ interface LoadingLogoProps {
   className?: string
 }
 
-export function LoadingLogo({ className }: LoadingLogoProps) {
-  const { theme } = useTheme()
+export const LoadingLogo = dynamic(() => Promise.resolve(({ className }: LoadingLogoProps) => {
+  const { theme, resolvedTheme } = useTheme()
+  const currentTheme = resolvedTheme || theme
 
   return (
     <div className="relative w-8 h-8">
-      {theme !== undefined && (
+      {currentTheme && (
         <Image
-          src={theme === 'dark' ? '/navbarLogo-light.svg' : '/navbarLogo-dark.svg'}
+          src={currentTheme === 'dark' ? '/navbarLogo-light.svg' : '/navbarLogo-dark.svg'}
           alt="MailSage Logo"
           width={32}
           height={32}
@@ -29,4 +30,4 @@ export function LoadingLogo({ className }: LoadingLogoProps) {
       )}
     </div>
   )
-}
+}), { ssr: false })

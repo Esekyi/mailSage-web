@@ -13,6 +13,7 @@ import {
   SheetTitle
 } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
+import { useEffect, useState } from 'react'
 
 // Use dynamic import for Image to avoid hydration issues
 const Image = dynamic(() => import('next/image'), {
@@ -25,8 +26,23 @@ interface HeaderProps {
 }
 
 export function Header({ className }: HeaderProps) {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, systemTheme, resolvedTheme } = useTheme()
   const { isAuthenticated } = useAuthStore()
+  const [mounted, setMounted] = useState(false)
+
+  // Handle mounting state
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Determine the current theme
+  const currentTheme = theme === 'system' ? systemTheme : theme
+  const effectiveTheme = mounted ? resolvedTheme : 'light' // Default to light during SSR
+
+  // Don't render theme-specific content until mounted
+  if (!mounted) {
+    return null // Or a loading skeleton
+  }
 
   const navigationItems = isAuthenticated ? (
     <>
@@ -108,13 +124,15 @@ export function Header({ className }: HeaderProps) {
     <header className={cn("bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60", className)}>
       <div className="container flex h-14 items-center">
         <Link href="/" className="flex items-center space-x-2">
-          <Image
-            src={theme === 'dark' ? '/navbarLogo-light.svg' : '/navbarLogo-dark.svg'}
-            alt="MailSage Logo"
-            width={32}
-            height={32}
-            priority
-          />
+          {mounted && (
+            <Image
+              src={effectiveTheme === 'dark' ? '/navbarLogo-light.svg' : '/navbarLogo-dark.svg'}
+              alt="MailSage Logo"
+              width={32}
+              height={32}
+              priority
+            />
+          )}
           <span className="font-semibold md:inline hidden">MailSage</span>
         </Link>
         <div className="flex-1" />
@@ -140,7 +158,7 @@ export function Header({ className }: HeaderProps) {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          onClick={() => setTheme(currentTheme === 'dark' ? 'light' : 'dark')}
           className="ml-2"
         >
           <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
