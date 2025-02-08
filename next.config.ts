@@ -5,7 +5,7 @@ const nextConfig = {
     return [
       {
         source: '/api/v1/:path*',
-        destination: 'http://localhost:80/api/v1/:path*',
+        destination: 'https://api.mailsage.vylis.tech/api/v1/:path*',
       },
     ]
   },
