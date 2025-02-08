@@ -26,6 +26,7 @@ export function JobControls({ job, onStatusChange, size = 'default', maxRetries 
       onStatusChange?.()
     } catch (error) {
       // Error is handled by the mutation
+      console.error('Error controlling job:', error)
     } finally {
       setIsLoading(false)
     }
@@ -104,7 +105,7 @@ export function BulkJobControls({ selectedJobs, onActionComplete, maxRetries }: 
       })
       onActionComplete?.()
     } catch (error) {
-      // Error is handled by the mutation
+      console.error('Error controlling bulk jobs:', error)
     } finally {
       setIsLoading(false)
     }

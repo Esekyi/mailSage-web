@@ -4,35 +4,82 @@ import { NotificationPreferences } from '@/components/preferences/notification-p
 import { GeneralPreferences } from '@/components/preferences/general-preferences'
 import { ThemeSelector } from '@/components/preferences/theme-selector'
 import { TimezoneSelector } from '@/components/preferences/timezone-selector'
-import { NotificationSettings } from '@/types/preferences'
-import { Loader2 } from 'lucide-react'
+import type { NotificationSettings, PreferencesData } from '@/types/preferences'
 import { Separator } from '@/components/ui/separator'
+import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export function PreferencesTab() {
   const {
-    preferences,
+    preferences = {
+      timezone: 'UTC',
+      email_notifications: {
+        system_updates: false,
+        security_alerts: false,
+        quota_alerts: false,
+        template_changes: false,
+        smtp_changes: false,
+        delivery_status: false
+      },
+      in_app_notifications: {
+        system_updates: false,
+        security_alerts: false,
+        quota_alerts: false,
+        template_changes: false,
+        smtp_changes: false,
+        delivery_status: false
+      },
+      preferences: {
+        login_alerts: false,
+        failed_attempt_alerts: false,
+        two_factor_auth: false,
+        quota_alerts: false,
+        usage_reports: false,
+        rate_limit_alerts: false,
+        template_versioning: false,
+        template_autosave: false,
+        template_change_alerts: false,
+        smtp_failure_alerts: false,
+        smtp_performance_alerts: false,
+        delivery_status_alerts: false,
+        marketing_emails: false,
+        product_updates: false,
+        maintenance_alerts: false
+      },
+      theme: 'light' as const
+    } satisfies PreferencesData,
     isLoading: isPreferencesLoading,
     updatePreferences,
     isUpdating
   } = usePreferences()
 
-  const {
-    theme,
-    setTheme,
-  } = useThemePreference()
-
+  const { theme, setTheme } = useThemePreference()
   const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>('light')
 
   useEffect(() => {
-    setSystemTheme(window?.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    setSystemTheme(mediaQuery.matches ? 'dark' : 'light')
+
+    const handler = (e: MediaQueryListEvent) => setSystemTheme(e.matches ? 'dark' : 'light')
+    mediaQuery.addEventListener('change', handler)
+    return () => mediaQuery.removeEventListener('change', handler)
   }, [])
 
-  useEffect(() => {
-    if (!isPreferencesLoading && preferences?.theme && theme !== preferences.theme) {
-      setTheme(preferences.theme)
-    }
-  }, [isPreferencesLoading, preferences?.theme, setTheme, theme])
+  const handleNotificationChange = (key: keyof NotificationSettings, value: boolean, type: 'email' | 'in_app') => {
+    updatePreferences({
+      [type === 'email' ? 'email_notifications' : 'in_app_notifications']: {
+        [key]: value
+      }
+    })
+  }
+
+  const handlePreferencesChange = (key: keyof PreferencesData['preferences'], value: boolean) => {
+    updatePreferences({
+      preferences: {
+        [key]: value
+      }
+    })
+  }
 
   if (isPreferencesLoading) {
     return (
@@ -42,45 +89,12 @@ export function PreferencesTab() {
     )
   }
 
-  const handleThemeChange = (newTheme: 'light' | 'dark') => {
-    // This will update both the UI and save to database
-    setTheme(newTheme)
-  }
-
-  const handleEmailNotificationsChange = (key: keyof NotificationSettings, value: boolean) => {
-    updatePreferences({
-      email_notifications: {
-        [key]: value
-      }
-    })
-  }
-
-  const handleInAppNotificationsChange = (key: keyof NotificationSettings, value: boolean) => {
-    updatePreferences({
-      in_app_notifications: {
-        [key]: value
-      }
-    })
-  }
-
-  const handlePreferencesChange = (key: keyof typeof preferences.preferences, value: boolean) => {
-    updatePreferences({
-      preferences: {
-        [key]: value
-      }
-    })
-  }
-
-  const handleTimezoneChange = (timezone: string) => {
-    updatePreferences({ timezone })
-  }
-
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium">Preferences</h3>
         <p className="text-sm text-muted-foreground">
-          Manage your notification preferences and application settings
+          Manage your account preferences and notification settings.
         </p>
       </div>
 
@@ -90,14 +104,13 @@ export function PreferencesTab() {
         <div className="grid gap-4 md:grid-cols-2">
           <ThemeSelector
             theme={theme === 'system' ? systemTheme : theme as 'light' | 'dark'}
-            onChange={handleThemeChange}
-            disabled={isUpdating || isPreferencesLoading}
-            // description="Choose your default theme preference. This will be saved to your account."
+            onChange={setTheme}
+            disabled={isUpdating}
           />
 
           <TimezoneSelector
             timezone={preferences.timezone}
-            onChange={handleTimezoneChange}
+            onChange={(timezone: string) => updatePreferences({ timezone })}
             disabled={isUpdating}
           />
         </div>
@@ -107,7 +120,7 @@ export function PreferencesTab() {
             title="Email Notifications"
             description="Configure which email notifications you'd like to receive"
             settings={preferences.email_notifications}
-            onChange={handleEmailNotificationsChange}
+            onChange={(key, value) => handleNotificationChange(key, value, 'email')}
             disabled={isUpdating}
           />
 
@@ -115,7 +128,7 @@ export function PreferencesTab() {
             title="In-App Notifications"
             description="Configure which in-app notifications you'd like to receive"
             settings={preferences.in_app_notifications}
-            onChange={handleInAppNotificationsChange}
+            onChange={(key, value) => handleNotificationChange(key, value, 'in_app')}
             disabled={isUpdating}
           />
         </div>

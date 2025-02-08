@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
-import { useToast } from '@/hooks/use-toast'
 import { ApiError, api, apiConfig } from '@/lib/api-config'
 import { Eye, EyeOff, Check, X } from 'lucide-react'
+import { toast } from 'sonner'
 
 
 // Types
@@ -44,7 +44,8 @@ export default function Register() {
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    website: '' // honeypot field
   })
 
   const [focusedField, setFocusedField] = useState<string | null>(null)
@@ -58,7 +59,6 @@ export default function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const router = useRouter()
-  const { error, success, info } = useToast()
 
   const calculatePasswordStrength = (password: string): number => {
     if (!password) return 0
@@ -113,6 +113,15 @@ export default function Register() {
     setIsLoading(true)
 
     try {
+      // If honeypot field is filled, silently fail
+      if (formData.website) {
+        // Simulate success but do nothing
+        toast.success("Registration Successful", {
+          description: "Please check your email to verify your account."
+        })
+        return
+      }
+
       // Client-side validation
       if (!validations.password.every(v => v)) {
         throw {
@@ -130,25 +139,22 @@ export default function Register() {
         } as ApiError
       }
 
-       // Remove confirmPassword before sending to API
-      const registerPayload = {
+      // Remove confirmPassword and honeypot field before sending to API
+      const { confirmPassword, website, ...registerPayload } = {
+        ...formData,
         email: formData.email.toLowerCase(),
-        name: formData.name.charAt(0).toUpperCase() + formData.name.slice(1),
-        password: formData.password
+        name: formData.name.charAt(0).toUpperCase() + formData.name.slice(1)
       }
 
-      await api.post<RegisterResponse, {email: string, name: string, password: string}>(
+      await api.post<RegisterResponse, typeof registerPayload>(
         apiConfig.endpoints.auth.register,
         registerPayload
       )
 
-      success({
-        title: "Registration Successful",
-        description: `Please check your email to verify your account.
-              Didn't receive the email?
-        `,
+      toast.success("Registration Successful", {
+        description: "Please check your email to verify your account.",
         action: {
-          label: "Click to resend",
+          label: "Resend verification email",
           onClick: () => router.push('/resend-verification')
         }
       })
@@ -159,18 +165,15 @@ export default function Register() {
       const apiError = err as ApiError
 
       if (apiError.errors) {
-        // Handle validation errors
         const errorMessages = Object.entries(apiError.errors)
           .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
           .join('\n')
 
-        info({
-          title: "Registration Failed",
+        toast.error("Registration Failed", {
           description: errorMessages,
         })
       } else {
-        error({
-          title: "Registration Failed",
+        toast.error("Registration Failed", {
           description: apiError.message || "Failed to create account. Please try again.",
         })
       }
@@ -190,6 +193,19 @@ export default function Register() {
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm p-4">
+            <div className="hidden">
+              <Label htmlFor="website">Website</Label>
+              <Input
+                id="website"
+                name="website"
+                type="text"
+                autoComplete="off"
+                value={formData.website}
+                onChange={handleChange}
+                tabIndex={-1}
+                aria-hidden="true"
+              />
+            </div>
             <div>
               <Label htmlFor="name">Full Name</Label>
               <Input

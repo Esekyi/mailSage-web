@@ -2,11 +2,42 @@ import { notFound } from 'next/navigation'
 import { axiosInstance } from '@/lib/axios'
 import { DocContent } from '@/components/docs/content/doc-content'
 import { AxiosError } from 'axios'
+import { Metadata } from 'next'
 
 interface DocPageProps {
   params: Promise<{
     slug: string[]
   }>
+}
+
+export async function generateMetadata({ params }: DocPageProps): Promise<Metadata> {
+  try {
+    const resolvedParams = await params
+    const slug = resolvedParams.slug.join('/')
+    const { data } = await axiosInstance.get(`/api/v1/docs/${slug}`)
+
+    return {
+      title: `${data.title} - Documentation`,
+      description: data.meta?.description || 'MailSage documentation and guides',
+      openGraph: {
+        title: `${data.title} - MailSage Documentation`,
+        description: data.meta?.description || 'MailSage documentation and guides',
+        type: 'article',
+      },
+    }
+  } catch (error) {
+    console.error('API Error:', error)
+    if (error instanceof AxiosError) {
+      console.error('Axios Error:', error.message)
+      console.error('Axios Error Response:', error.response)
+    } else {
+      console.error('Unexpected Error:', error)
+    }
+    return {
+      title: 'Documentation',
+      description: 'MailSage documentation and guides',
+    }
+  }
 }
 
 export default async function DocPage({ params }: DocPageProps) {
@@ -36,42 +67,13 @@ export default async function DocPage({ params }: DocPageProps) {
       />
     )
   } catch (error) {
-    // Handle 404 errors
+    console.error('API Error:', error)
     if (error instanceof AxiosError) {
-      if (error.response?.status === 404) {
-        notFound()
-      }
-
-      // Handle network errors with a user-friendly message
-      if (error.code === 'ERR_NETWORK') {
-        return (
-          <DocContent
-            title="Connection Error"
-            content=""
-            error="We're unable to connect to the documentation server. Please check your internet connection and try again later."
-          />
-        )
-      }
-
-      // Handle timeout errors
-      if (error.code === 'ECONNABORTED') {
-        return (
-          <DocContent
-            title="Connection Timeout"
-            content=""
-            error="The request to our documentation server timed out. Please try again later."
-          />
-        )
-      }
+      console.error('Axios Error:', error.message)
+      console.error('Axios Error Response:', error.response)
+    } else {
+      console.error('Unexpected Error:', error)
     }
-
-    // Handle other errors with a generic message
-    return (
-      <DocContent
-        title="Documentation Error"
-        content=""
-        error="We're having trouble loading the documentation. Please try again later."
-      />
-    )
+    notFound()
   }
 }

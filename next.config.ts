@@ -5,7 +5,7 @@ const nextConfig = {
     return [
       {
         source: '/api/v1/:path*',
-        destination: 'http://localhost:5000/api/v1/:path*',
+        destination: 'http://localhost:80/api/v1/:path*',
       },
     ]
   },
@@ -16,7 +16,18 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['images.unsplash.com']
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'avatar.vercel.sh',
+        pathname: '/**',
+      },
+    ],
   }
 }
 
