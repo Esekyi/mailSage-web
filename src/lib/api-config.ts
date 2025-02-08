@@ -1,7 +1,7 @@
 import { useAuthStore } from '@/store/auth'
 
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:80'
 const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION || 'v1'
 
 
@@ -104,6 +104,7 @@ export async function fetchApi<T>(
             message: 'Session expired. Please login again.',
             code: 'SESSION_EXPIRED'
           } as ApiError;
+          console.error('Refresh error:', _refreshError);
         }
       }
     }

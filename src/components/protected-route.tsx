@@ -4,8 +4,10 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/auth'
 import { LoadingLogo } from '@/components/loading-logo'
+import dynamic from 'next/dynamic'
 
-export function ProtectedRoute({ children }: { children: React.ReactNode }) {
+// Wrap the component in NoSSR to prevent hydration mismatch
+const ProtectedRouteContent = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter()
   const { isAuthenticated, isHydrated } = useAuthStore()
 
@@ -25,3 +27,8 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   return isAuthenticated ? children : null
 }
+
+// Export a no-SSR version of the component
+export const ProtectedRoute = dynamic(() => Promise.resolve(ProtectedRouteContent), {
+  ssr: false,
+}) as typeof ProtectedRouteContent

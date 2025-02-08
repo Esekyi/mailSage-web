@@ -154,6 +154,7 @@ export function SMTPForm({
       onOpenChange(false)
     } catch (_error) {
       // Error handling is done in the parent component
+      console.error('Error submitting SMTP form:', _error)
     }
   }
 

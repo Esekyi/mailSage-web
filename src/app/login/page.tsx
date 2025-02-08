@@ -6,41 +6,39 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/use-auth'
 import { ApiError } from '@/lib/api-config'
 import { Eye, EyeOff } from 'lucide-react'
+import { toast } from 'sonner'
 
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [username, setUsername] = useState('') // honeypot field
 
   const router = useRouter()
-  const { success, error } = useToast()
   const { login, isLoginLoading } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    // If honeypot field is filled, silently fail
+    if (username) {
+      // Simulate success but do nothing
+      toast.success("Successfully logged in!")
+      return
+    }
+
     try {
       await login({email: email.toLowerCase(), password})
-
-      // Show success toast
-      success({
-        title: "Success",
-        description: "Successfully logged in!"
-      })
-
+      toast.success("Successfully logged in!")
     } catch (err) {
       const apiError = err as ApiError
 
-      // Handle different types of errors
       if (apiError.message?.includes('Email not verified')) {
-        // Validation errors
-        error({
-          title: "Email Not Verified",
+        toast.error("Email Not Verified", {
           description: "Please verify your email before logging in.",
           action: {
             label: "Resend",
@@ -50,19 +48,15 @@ export default function Login() {
         return
       }
       if (apiError.errors) {
-        // Validation errors
         const errorMessage = Object.entries(apiError.errors)
           .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
           .join('\n')
 
-        error({
-          title: "Error",
+        toast.error("Error", {
           description: errorMessage,
         })
       } else {
-        // General error (including invalid credentials)
-        error({
-          title: "Error",
+        toast.error("Error", {
           description: apiError.message || "Login failed. Please check your credentials.",
         })
       }
@@ -77,6 +71,20 @@ export default function Login() {
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm p-4">
+            {/* Honeypot field - hidden from real users */}
+            <div className="hidden">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                name="username"
+                type="text"
+                autoComplete="off"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                tabIndex={-1}
+                aria-hidden="true"
+              />
+            </div>
             <div>
               <Label htmlFor="email">Email address</Label>
               <Input
@@ -89,6 +97,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoginLoading}
+                className="mt-1"
               />
             </div>
             <div>
@@ -104,6 +113,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoginLoading}
+                  className="mt-1"
                 />
                 <button
                     type="button"

@@ -15,11 +15,11 @@ export function useThemePreference() {
 
   const setThemeWithPreference = async (newTheme: 'light' | 'dark' | 'system') => {
     setTheme(newTheme)
-    
+
     // Only update backend if theme has changed and it's not the initial load
     if (!isLoading && newTheme !== preferences?.theme) {
-      await updatePreferences({ 
-        theme: newTheme === 'system' ? null : newTheme 
+      await updatePreferences({
+        theme: newTheme === 'system' ? null : newTheme
       })
     }
   }

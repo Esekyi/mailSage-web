@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { LayoutDashboard, Mail, Key, Settings, Menu, X, Server, LogOut, CreditCard, User, Sun, Moon, Trash2, ChevronRight, BarChart3, History } from 'lucide-react'
+import { LayoutDashboard, Mail, Key, Settings, Menu, X, Server, LogOut, CreditCard, User, Trash2, ChevronRight, BarChart3, History } from 'lucide-react'
 import { useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -16,11 +16,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAuthStore } from '@/store/auth'
-import { useThemePreference } from "@/hooks/useThemePreference"
 import { Badge } from '@/components/ui/badge'
 import type { JobAnalytics } from '@/types/jobs'
 import { useJobAnalytics } from '@/hooks/useJobs'
-
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 interface NavItem {
   name: string
   href: string
@@ -83,7 +82,6 @@ export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { user, logout } = useAuthStore()
-  const { theme, setTheme } = useThemePreference()
   const { data: analytics } = useJobAnalytics(0) // Use a dummy ID to get overall analytics
 
   const handleLogout = () => {
@@ -213,13 +211,14 @@ export function Sidebar() {
                   Billing
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-                {theme === 'dark' ? (
-                  <Sun className="mr-2 h-4 w-4" />
-                ) : (
-                  <Moon className="mr-2 h-4 w-4" />
-                )}
-                Toggle theme
+              <DropdownMenuItem asChild>
+                <ThemeToggle
+                  variant="ghost"
+                  size="default"
+                  permanent={true}
+                  className="w-full justify-start cursor-pointer"
+                  showLabel={true}
+                />
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout} className="text-red-500">

@@ -4,13 +4,12 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
 import { ArrowLeft, Calendar, Clock, Tag } from 'lucide-react'
+import { axiosInstance } from '@/lib/axios'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { ShareButtons } from '@/components/share-buttons'
-import { NewsletterSignup } from '@/components/newsletter-signup'
 
 interface BlogPost {
   id: number
@@ -50,33 +49,48 @@ async function getBlogPost(slug: string): Promise<BlogPost> {
   return res.json()
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const post = await getBlogPost(params.slug)
+interface PageProps {
+  params: Promise<{
+    slug: string
+  }>
+}
 
-  return {
-    title: post.meta.title,
-    description: post.meta.description,
-    keywords: post.meta.keywords,
-    openGraph: {
-      title: post.meta.title,
-      description: post.meta.description,
-      images: [post.cover_image],
-      type: 'article',
-      publishedTime: post.published_at,
-      authors: [post.author.name],
-      tags: post.tags.map(tag => tag.name)
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: post.meta.title,
-      description: post.meta.description,
-      images: [post.cover_image]
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  try {
+    const resolvedParams = await params
+    const { data } = await axiosInstance.get<BlogPost>(`/api/v1/blog/posts/${resolvedParams.slug}`)
+
+    return {
+      title: data.meta.title || data.title,
+      description: data.meta.description || data.excerpt,
+      openGraph: {
+        title: data.meta.title || data.title,
+        description: data.meta.description || data.excerpt,
+        type: 'article',
+        publishedTime: data.published_at,
+        authors: [data.author.name],
+        images: [data.cover_image],
+        tags: data.tags.map(tag => tag.name),
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: data.meta.title || data.title,
+        description: data.meta.description || data.excerpt,
+      },
+      keywords: data.meta.keywords,
+    }
+  } catch (error) {
+    console.error('API Error:', error)
+    return {
+      title: 'Blog Post Not Found',
+      description: 'The requested blog post could not be found.',
     }
   }
 }
 
-export default async function BlogPostPage({ params }: { params: { slug: string } }) {
-  const post = await getBlogPost(params.slug)
+export default async function BlogPostPage({ params }: PageProps) {
+  const resolvedParams = await params
+  const post = await getBlogPost(resolvedParams.slug)
 
   return (
     <main className="container max-w-4xl mx-auto px-4 py-8">
@@ -149,10 +163,6 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
           url={`${process.env.NEXT_PUBLIC_URL}/blog/${post.slug}`}
           title={post.title}
         />
-
-        <Card className="my-12 p-6">
-          <NewsletterSignup />
-        </Card>
       </article>
     </main>
   )
