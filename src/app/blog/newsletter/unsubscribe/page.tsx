@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { axiosInstance } from '@/lib/axios'
 import { toast } from 'sonner'
@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Mail, AlertCircle, CheckCircle2, XCircle } from 'lucide-react'
 import Link from 'next/link'
 import { AxiosError } from 'axios'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface UnsubscribeResponse {
   message: string
@@ -22,7 +23,7 @@ interface UnsubscribeError {
   details?: string
 }
 
-export default function UnsubscribePage() {
+function UnsubscribeContent() {
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [response, setResponse] = useState<UnsubscribeResponse | UnsubscribeError | null>(null)
@@ -119,49 +120,75 @@ export default function UnsubscribePage() {
   const content = getContent()
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-muted/50">
-      <Card className="w-full max-w-lg">
-        <CardHeader className="text-center pb-2">
-          <div className="flex justify-center mb-6">
-            {getStatusIcon()}
-          </div>
-          <CardTitle className="text-2xl">{content.title}</CardTitle>
-          <CardDescription className="text-base mt-2">
-            {content.description}
-          </CardDescription>
-          {content.details && (
-            <div className="mt-4 p-4 rounded-lg bg-muted flex items-start gap-2">
-              <AlertCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-              <p className="text-sm text-muted-foreground text-left">
-                {content.details}
-              </p>
-            </div>
-          )}
-        </CardHeader>
-        <CardContent className="flex flex-col items-center gap-4 pt-6">
-          {email && (
-            <p className="text-sm text-muted-foreground">
-              Email: {email}
+    <Card className="w-full max-w-lg">
+      <CardHeader className="text-center pb-2">
+        <div className="flex justify-center mb-6">
+          {getStatusIcon()}
+        </div>
+        <CardTitle className="text-2xl">{content.title}</CardTitle>
+        <CardDescription className="text-base mt-2">
+          {content.description}
+        </CardDescription>
+        {content.details && (
+          <div className="mt-4 p-4 rounded-lg bg-muted flex items-start gap-2">
+            <AlertCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+            <p className="text-sm text-muted-foreground text-left">
+              {content.details}
             </p>
-          )}
-          {status !== 'loading' && (
-            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-              <Button asChild>
-                <Link href="/">
-                  Return to Homepage
+          </div>
+        )}
+      </CardHeader>
+      <CardContent className="flex flex-col items-center gap-4 pt-6">
+        {email && (
+          <p className="text-sm text-muted-foreground">
+            Email: {email}
+          </p>
+        )}
+        {status !== 'loading' && (
+          <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+            <Button asChild>
+              <Link href="/">
+                Return to Homepage
+              </Link>
+            </Button>
+            {status === 'error' && (
+              <Button variant="outline" asChild>
+                <Link href="/contact">
+                  Contact Support
                 </Link>
               </Button>
-              {status === 'error' && (
-                <Button variant="outline" asChild>
-                  <Link href="/contact">
-                    Contact Support
-                  </Link>
-                </Button>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+function LoadingSkeleton() {
+  return (
+    <Card className="w-full max-w-lg">
+      <CardHeader className="text-center pb-2">
+        <div className="flex justify-center mb-6">
+          <Skeleton className="h-12 w-12 rounded-full" />
+        </div>
+        <Skeleton className="h-8 w-3/4 mx-auto mb-4" />
+        <Skeleton className="h-4 w-2/3 mx-auto" />
+      </CardHeader>
+      <CardContent className="flex flex-col items-center gap-4 pt-6">
+        <Skeleton className="h-4 w-1/2" />
+        <Skeleton className="h-10 w-40" />
+      </CardContent>
+    </Card>
+  )
+}
+
+export default function UnsubscribePage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 bg-muted/50">
+      <Suspense fallback={<LoadingSkeleton />}>
+        <UnsubscribeContent />
+      </Suspense>
     </div>
   )
 }
